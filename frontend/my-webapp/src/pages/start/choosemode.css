@@ -1,0 +1,16 @@
+.mainBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.link {
+    height: 40px;
+    width: 200px;
+}
+
+.linkButton {
+    width: 100px;
+    height: 32px;
+}
