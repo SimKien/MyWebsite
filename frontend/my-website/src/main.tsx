@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './main.css';
 import Test from "./pages/test/test";
 import Startpage from './pages/start/startpage';
 import TicTacToe from './pages/tictactoe/tictactoe';
