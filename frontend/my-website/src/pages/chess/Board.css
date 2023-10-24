@@ -16,6 +16,10 @@
     height: 5rem;
     width: 5rem;
     border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .white {

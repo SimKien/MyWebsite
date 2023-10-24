@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react";
 import "./Board.css";
-import {Piece, PieceComponent, PieceType, PositionInfo} from "pages/chess/Piece";
+import {Piece, PieceComponent, PieceColor, PieceType, PositionInfo} from "pages/chess/Piece";
 
 function is_numeric(str: string){
     return /^\d$/.test(str);
 }
 
 function loadPosition(fen: string, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {
-    for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; i++) {
-            let square = document.getElementById(`r${i}c${j}`);
-            if (square) {
-                square.innerHTML = "";
-            }
-        }
-    }
     let result = new Array<Array<PositionInfo>>(size);
     for (let i: number = 0; i < size; i++) {
         result[i] = new Array<PositionInfo>(size);
@@ -32,23 +24,12 @@ function loadPosition(fen: string, size: number, setBoard: (board: Array<Array<P
         } else if (is_numeric(letter)) {
             colnumber += parseInt(letter);
         } else {
-            let piece: Piece = {
-                position: [rownumber, colnumber],
-                type: letter.toUpperCase() as PieceType,
-                color: letter === letter.toUpperCase() ? "white" : "black"
-            };
-            let pieceComponent = PieceComponent({piece: piece});
-            let square = document.getElementById(`r${rownumber}c${colnumber}`);
-            result[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? "white" : "black"];
-            if (square) {
-                
-            }
+            result[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? "white" : "black" as PieceColor];
             colnumber += 1;
         }
     }
     setBoard(result);
 }
-
 
 export default function Board() {
     const size = 8;
@@ -66,18 +47,42 @@ export default function Board() {
         setBoard(result);
     }, []);
 
-    
+    useEffect(() => {
+        loadPosition(fen, size, setBoard);
+    }, [fen]);
 
     return(
         <div className="board">
             {
-                board.map((row, rindex) => <div className="row">{
-                        row.map((_, cindex) => {
-                            return <div id={`r${rindex}c${cindex}`} className={`square ${(rindex + cindex) % 2 === 0 ? "white" : "black"}`}></div>;
-                        })
-                    }</div>
-                )
+                board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
+                    row.map((_, cindex) => {
+                        return <Square positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
+                    })
+                }</div>)
             }
+        </div>
+    );
+}
+
+function Square(props: {positionInfo: PositionInfo, rindex: number, cindex: number})  {
+    const [piece, setPiece] = useState<Piece | undefined>(undefined);
+
+    useEffect(() => {
+        if (props.positionInfo[0] === undefined || props.positionInfo[1] === undefined) {
+            setPiece(undefined);
+        } else {
+            let newPiece: Piece = {
+                position: [props.rindex, props.cindex],
+                type: props.positionInfo[0] as PieceType,
+                color: props.positionInfo[1] as PieceColor
+            }
+            setPiece(newPiece);
+        }
+    }, [props.positionInfo]);
+
+    return (
+        <div className={`square ${(props.rindex + props.cindex) % 2 === 0 ? "white" : "black"}`}>
+            <PieceComponent piece={piece} />
         </div>
     );
 }

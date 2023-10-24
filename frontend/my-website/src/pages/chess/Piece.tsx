@@ -33,7 +33,10 @@ export const PIECE_MAP: PieceMap= {
     P: (color: PieceColor) => color === 'white' ? <PawnWhiteSVG /> : <PawnBlackSVG />
 };
 
-export function PieceComponent(props: {piece: Piece}) {
-
-    return PIECE_MAP[props.piece.type](props.piece.color);
+export function PieceComponent(props: {piece: Piece | undefined}) {
+    if (props.piece === undefined) {
+        return <></>;
+    } else {
+        return PIECE_MAP[props.piece.type](props.piece.color);
+    }
 }
