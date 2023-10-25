@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./Board.css";
+import "pages/chess/Board.css";
 import {Piece, PieceComponent, PieceColor, PieceType, PositionInfo} from "pages/chess/Piece";
 
 function is_numeric(str: string){
