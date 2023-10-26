@@ -1,4 +1,4 @@
-import {PieceColor, PieceType, PositionInfo} from "pages/chess/Piece";
+import { PieceColor, PieceType, PositionInfo } from "pages/chess/Piece";
 
 export function turnBoard(board: Array<Array<PositionInfo>>, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {
     let result = new Array<Array<PositionInfo>>(size);
@@ -11,7 +11,7 @@ export function turnBoard(board: Array<Array<PositionInfo>>, size: number, setBo
     setBoard(result);
 }
 
-function is_numeric(str: string){
+function is_numeric(str: string) {
     return /^\d$/.test(str);
 }
 

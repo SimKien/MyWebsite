@@ -15,7 +15,7 @@ import "pages/chess/Piece.css"
 export type Position = [number, number];
 export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
 export type PieceColor = 'white' | 'black';
-export type PieceMap = {[K in PieceType]: (color: PieceColor) => JSX.Element};
+export type PieceMap = { [K in PieceType]: (color: PieceColor) => JSX.Element };
 export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 
 
@@ -25,16 +25,16 @@ export interface Piece {
     color: PieceColor;
 }
 
-export const PIECE_MAP: PieceMap= {
+export const PIECE_MAP: PieceMap = {
     K: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" src={KingBlackSVG} alt="King Black"></img>,
     Q: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" src={QueenBlackSVG} alt="Queen Black"></img>,
     R: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" src={RookBlackSVG} alt="Rook Black"></img>,
     B: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piecesvg" src={BishopBlackSVG} alt="Bishop Black"></img>,
-    N: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> :<img className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
+    N: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> : <img className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
     P: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
 };
 
-export function PieceComponent(props: {piece: Piece | undefined}) {
+export function PieceComponent(props: { piece: Piece | undefined }) {
     if (props.piece === undefined) {
         return <div className="piececontainer"></div>;
     } else {
