@@ -1,4 +1,4 @@
-import Board from "./Board";
+import Board from "pages/chess/Board";
 
 export default function Chess() {
     return (
