@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./tictactoe.css"
+import "pages/tictactoe/tictactoe.css"
 
 const boardSize: number = 3;
 
@@ -37,7 +37,7 @@ function checkVictory(board: Array<Array<string>>, size: number) {
     } else return null;
 }
 
-function Square(props: { currentSymbol: string, changeSymbol: (row: number, col: number) => void, row: number, col: number, finished: boolean}) {
+function Square(props: { currentSymbol: string, changeSymbol: (row: number, col: number) => void, row: number, col: number, finished: boolean }) {
     const [symbol, setSymbol] = useState(" ");
     const [isClicked, setIsClicked] = useState(false);
 
@@ -50,7 +50,7 @@ function Square(props: { currentSymbol: string, changeSymbol: (row: number, col:
     }
 
     return (
-        <div className="square" onClick={click}>{symbol}</div>
+        <div className="tictactoesquare" onClick={click}>{symbol}</div>
     );
 }
 
@@ -87,9 +87,9 @@ function Board(props: { setWintext: (text: string) => void }) {
     };
 
     return (
-        <div className="board">
+        <div className="tictactoeboard">
             {board.map((row, rowindex) => {
-                return <div className="row">
+                return <div className="tictactoerow">
                     {row.map((_, colindex) => {
                         return <Square currentSymbol={currentSymbol} changeSymbol={processMove} row={rowindex} col={colindex} finished={finished} />
                     })}
@@ -103,10 +103,10 @@ export default function Tictactoe() {
     const [wintext, setWintext] = useState("");
 
     return (
-        <div className="mainbox">
+        <div className="tictactoemainbox">
             <h1 className="title">TicTacToe</h1>
             <Board setWintext={setWintext} />
-            <button className="refreshbutton" onClick={() => {window.location.reload()}}>Restart</button>
+            <button className="refreshbutton" onClick={() => { window.location.reload() }}>Restart</button>
             <p className="wintext">{wintext}</p>
         </div>
     );

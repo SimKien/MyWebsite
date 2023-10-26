@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "pages/chess/Board.css";
-import {Piece, PieceComponent, PieceColor, PieceType, PositionInfo} from "pages/chess/Piece";
-import {turnBoard, loadPosition} from "pages/chess/BoardOperations";
+import { Piece, PieceComponent, PieceColor, PieceType, PositionInfo } from "pages/chess/Piece";
+import { turnBoard, loadPosition } from "pages/chess/BoardOperations";
 
 export default function Board() {
     const size = 8;
@@ -23,23 +23,22 @@ export default function Board() {
         loadPosition(fen, size, setBoard);
     }, [fen]);
 
-    return(
+    return (
         <div>
-        <div className="board">
-            {
-                board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
-                    row.map((_, cindex) => {
-                        return <Square positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
-                    })
-                }</div>)
-            }
-        </div>
-        <button onClick={() => turnBoard(board, size, setBoard)}>Turn Board</button>
+            <div className="board">
+                {
+                    board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
+                        row.map((_, cindex) => {
+                            return <Square positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
+                        })
+                    }</div>)
+                }
+            </div>
         </div>
     );
 }
 
-function Square(props: {positionInfo: PositionInfo, rindex: number, cindex: number})  {
+function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number }) {
     const [piece, setPiece] = useState<Piece | undefined>(undefined);
 
     useEffect(() => {

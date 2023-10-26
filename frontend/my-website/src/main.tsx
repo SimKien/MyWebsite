@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './main.css';
-import Test from "./pages/test/test";
-import Startpage from './pages/start/startpage';
-import TicTacToe from './pages/tictactoe/tictactoe';
-import Chess from './pages/chess/chess';
-import { BrowserRouter, Routes, Route} from 'react-router-dom';
+import 'main.css';
+import Test from "pages/test/test";
+import Startpage from 'pages/start/startpage';
+import TicTacToe from 'pages/tictactoe/tictactoe';
+import Chess from 'pages/chess/chess';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

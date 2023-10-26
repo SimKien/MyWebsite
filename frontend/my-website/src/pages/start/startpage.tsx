@@ -1,9 +1,9 @@
-import "./startpage.css"
-import Choosemode from "./choosemode";
+import "pages/start/startpage.css"
+import Choosemode from "pages/start/choosemode";
 
 export default function Startpage() {
     return (
-        <div className="mainbox">
+        <div className="startmainbox">
             <Choosemode />
         </div>
     );

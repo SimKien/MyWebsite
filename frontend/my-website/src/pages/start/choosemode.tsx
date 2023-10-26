@@ -1,8 +1,8 @@
-import "./choosemode.css";
+import "pages/start/choosemode.css";
 
 export default function Choosemode() {
     return (
-        <div className="mainBox">
+        <div className="choosemodemainBox">
             <div className="link">
                 <a href="/chess">
                     <button className="linkButton">Chess</button>

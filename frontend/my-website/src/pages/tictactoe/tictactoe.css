@@ -1,4 +1,4 @@
-.board {
+.tictactoeboard {
     display: flex;
     flex-direction: column;
 }
@@ -10,16 +10,18 @@
     margin: 0;
 }
 
-.row {
+.tictactoerow {
     display: flex;
     flex-direction: row;
 }
 
-.square {
+.tictactoesquare {
     background-color: white;
     width: 50px;
     height: 50px;
-    border: 1px solid rgb(0, 0, 0);
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
     font-size: 40px;
     font-weight: bold;
     display: flex;
@@ -28,11 +30,13 @@
     cursor: default;
 }
 
-.mainbox {
+.tictactoemainbox {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-height: 100vh;
+    min-width: 100vw;
     margin: 0;
     background-color: rgb(65, 65, 65);
 }
