@@ -1,4 +1,9 @@
-.piece {
+.piecesvg {
+    height: 100%;
+    width: 100%;
+}
+
+.piececontainer {
     height: 90%;
     width: 90%;
 }

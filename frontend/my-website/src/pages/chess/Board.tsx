@@ -1,35 +1,7 @@
 import { useEffect, useState } from "react";
 import "pages/chess/Board.css";
 import {Piece, PieceComponent, PieceColor, PieceType, PositionInfo} from "pages/chess/Piece";
-
-function is_numeric(str: string){
-    return /^\d$/.test(str);
-}
-
-function loadPosition(fen: string, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {
-    let result = new Array<Array<PositionInfo>>(size);
-    for (let i: number = 0; i < size; i++) {
-        result[i] = new Array<PositionInfo>(size);
-        for (let j: number = 0; j < size; j++) {
-            result[i][j] = [undefined, undefined];
-        }
-    }
-    let pos = fen.split(" ")[0];
-    let rownumber = 0;
-    let colnumber = 0;
-    for (let letter of pos) {
-        if (letter === "/") {
-            rownumber += 1;
-            colnumber = 0;
-        } else if (is_numeric(letter)) {
-            colnumber += parseInt(letter);
-        } else {
-            result[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? "white" : "black" as PieceColor];
-            colnumber += 1;
-        }
-    }
-    setBoard(result);
-}
+import {turnBoard, loadPosition} from "pages/chess/BoardOperations";
 
 export default function Board() {
     const size = 8;
@@ -52,6 +24,7 @@ export default function Board() {
     }, [fen]);
 
     return(
+        <div>
         <div className="board">
             {
                 board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
@@ -60,6 +33,8 @@ export default function Board() {
                     })
                 }</div>)
             }
+        </div>
+        <button onClick={() => turnBoard(board, size, setBoard)}>Turn Board</button>
         </div>
     );
 }

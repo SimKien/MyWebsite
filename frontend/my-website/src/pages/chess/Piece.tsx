@@ -26,18 +26,22 @@ export interface Piece {
 }
 
 export const PIECE_MAP: PieceMap= {
-    K: (color: PieceColor) => color === 'white' ? <img className="piece" src={KingWhiteSVG} alt="King White"></img> : <img className="piece" src={KingBlackSVG} alt="King Black"></img>,
-    Q: (color: PieceColor) => color === 'white' ? <img className="piece" src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piece" src={QueenBlackSVG} alt="Queen Black"></img>,
-    R: (color: PieceColor) => color === 'white' ? <img className="piece" src={RookWhiteSVG} alt="Rook White"></img> : <img className="piece" src={RookBlackSVG} alt="Rook Black"></img>,
-    B: (color: PieceColor) => color === 'white' ? <img className="piece" src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piece" src={BishopBlackSVG} alt="Bishop Black"></img>,
-    N: (color: PieceColor) => color === 'white' ? <img className="piece" src={KnightWhiteSVG} alt="Knight White"></img> :<img className="piece" src={KnightBlackSVG} alt="Knight Black"></img>,
-    P: (color: PieceColor) => color === 'white' ? <img className="piece" src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piece" src={PawnBlackSVG} alt="Pawn Black"></img>
+    K: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" src={KingBlackSVG} alt="King Black"></img>,
+    Q: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" src={QueenBlackSVG} alt="Queen Black"></img>,
+    R: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" src={RookBlackSVG} alt="Rook Black"></img>,
+    B: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piecesvg" src={BishopBlackSVG} alt="Bishop Black"></img>,
+    N: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> :<img className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
+    P: (color: PieceColor) => color === 'white' ? <img className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
 };
 
 export function PieceComponent(props: {piece: Piece | undefined}) {
     if (props.piece === undefined) {
-        return <></>;
+        return <div className="piececontainer"></div>;
     } else {
-        return PIECE_MAP[props.piece.type](props.piece.color);
+        return (
+            <div className="piececontainer">
+                {PIECE_MAP[props.piece.type](props.piece.color)}
+            </div>
+        );
     }
 }
