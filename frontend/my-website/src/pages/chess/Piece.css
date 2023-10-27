@@ -6,4 +6,6 @@
 .piececontainer {
     height: 90%;
     width: 90%;
+    position: absolute;
+    cursor: pointer;
 }

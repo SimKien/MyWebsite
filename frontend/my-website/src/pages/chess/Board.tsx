@@ -24,22 +24,21 @@ export default function Board() {
     }, [fen]);
 
     return (
-        <div>
-            <div className="board">
-                {
-                    board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
-                        row.map((_, cindex) => {
-                            return <Square positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
-                        })
-                    }</div>)
-                }
-            </div>
+        <div className="board" id="mainboard">
+            {
+                board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
+                    row.map((_, cindex) => {
+                        return <Square key={cindex.toString()} positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
+                    })
+                }</div>)
+            }
         </div>
     );
 }
 
 function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number }) {
     const [piece, setPiece] = useState<Piece | undefined>(undefined);
+    const position = [props.rindex, props.cindex];
 
     useEffect(() => {
         if (props.positionInfo[0] === undefined || props.positionInfo[1] === undefined) {
@@ -55,7 +54,7 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
     }, [props.positionInfo]);
 
     return (
-        <div className={`square ${(props.rindex + props.cindex) % 2 === 0 ? "white" : "black"}`}>
+        <div id={`r${position[0]}c${position[1]}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? "white" : "black"}`}>
             <PieceComponent piece={piece} />
         </div>
     );
