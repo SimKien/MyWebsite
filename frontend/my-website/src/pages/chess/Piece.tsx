@@ -59,7 +59,7 @@ export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: Re
         const mainbody = props.mainbodyef.current;
         const piecediv = piecedivref.current;
 
-        const onMouseDown = (e: MouseEvent) => {
+        const onPointerDown = (e: PointerEvent) => {
             isClicked.current = true;
             zIndex.current = piecediv.style.zIndex;
             coords.current.startx = e.clientX;
@@ -67,14 +67,14 @@ export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: Re
             piecediv.style.zIndex = "1000";
         };
 
-        const onMouseUp = (e: MouseEvent) => {
+        const onPointerUp = (e: PointerEvent) => {
             isClicked.current = false;
             coords.current.lastx = piecediv.offsetLeft;
             coords.current.lasty = piecediv.offsetTop;
             piecediv.style.zIndex = zIndex.current.toString();
         };
 
-        const onMouseMove = (e: MouseEvent) => {
+        const onPointerMove = (e: PointerEvent) => {
             if (!isClicked.current) return;
             const nextx = e.clientX - coords.current.startx + coords.current.lastx;
             const nexty = e.clientY - coords.current.starty + coords.current.lasty;
@@ -82,14 +82,16 @@ export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: Re
             piecediv.style.top = `${nexty}px`;
         };
 
-        piecediv.addEventListener("mousedown", onMouseDown);
-        piecediv.addEventListener("mouseup", onMouseUp);
-        mainbody.addEventListener("mousemove", onMouseMove);
+        piecediv.addEventListener("pointerdown", onPointerDown);
+        piecediv.addEventListener("pointerup", onPointerUp);
+        mainbody.addEventListener("pointermove", onPointerMove);
+        mainbody.addEventListener("pointerleave", onPointerUp);
 
         const cleanup = () => {
-            piecediv.removeEventListener("mousedown", onMouseDown);
-            piecediv.removeEventListener("mouseup", onMouseUp);
-            mainbody.removeEventListener("mousemove", onMouseMove);
+            piecediv.removeEventListener("pointerdown", onPointerDown);
+            piecediv.removeEventListener("pointerup", onPointerUp);
+            mainbody.removeEventListener("pointermove", onPointerMove);
+            mainbody.removeEventListener("pointerleave", onPointerUp);
         }
 
         return cleanup;
