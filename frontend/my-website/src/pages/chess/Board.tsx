@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "pages/chess/Board.css";
 import { Piece, PieceComponent, PieceColor, PieceType, PositionInfo } from "pages/chess/Piece";
 import { turnBoard, loadPosition } from "pages/chess/BoardOperations";
 
-export default function Board() {
+export default function Board(props: { mainbodyref: React.RefObject<HTMLDivElement> }) {
     const size = 8;
     const [board, setBoard] = useState(new Array<Array<PositionInfo>>());
     const [fen, setFEN] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    const mainbodyref = props.mainbodyref;
 
     useEffect(() => {
         const result = new Array<Array<PositionInfo>>(size);
@@ -28,7 +29,7 @@ export default function Board() {
             {
                 board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
                     row.map((_, cindex) => {
-                        return <Square key={cindex.toString()} positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
+                        return <Square mainbodyref={mainbodyref} key={cindex.toString()} positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex} />
                     })
                 }</div>)
             }
@@ -36,9 +37,11 @@ export default function Board() {
     );
 }
 
-function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number }) {
+function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number, mainbodyref: React.RefObject<HTMLDivElement> }) {
     const [piece, setPiece] = useState<Piece | undefined>(undefined);
     const position = [props.rindex, props.cindex];
+
+    const mainbodyref = props.mainbodyref;
 
     useEffect(() => {
         if (props.positionInfo[0] === undefined || props.positionInfo[1] === undefined) {
@@ -55,7 +58,7 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
 
     return (
         <div id={`r${position[0]}c${position[1]}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? "white" : "black"}`}>
-            <PieceComponent piece={piece} />
+            <PieceComponent piece={piece} mainbodyef={mainbodyref} />
         </div>
     );
 }

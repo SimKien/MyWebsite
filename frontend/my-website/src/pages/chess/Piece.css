@@ -8,4 +8,5 @@
     width: 90%;
     position: absolute;
     cursor: pointer;
+    overflow: visible;
 }

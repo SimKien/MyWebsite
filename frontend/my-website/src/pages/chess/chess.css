@@ -1,0 +1,9 @@
+.mainbody {
+    background-color: rgb(65, 65, 65);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-width: 100vw;
+}

@@ -35,8 +35,7 @@ const PIECE_MAP: PieceMap = {
     P: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
 };
 
-export function PieceComponent(props: { piece: Piece | undefined }) {
-
+export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: React.RefObject<HTMLDivElement> }) {
     const piecedivref = useRef<HTMLDivElement>(null);
 
     const isClicked = useRef<boolean>(false);
@@ -54,9 +53,10 @@ export function PieceComponent(props: { piece: Piece | undefined }) {
     });
 
     useEffect(() => {
-        if (!piecedivref.current) return;
+        if (!props.mainbodyef.current || !piecedivref.current) return;
 
-        const container = piecedivref.current;
+        const mainbody = props.mainbodyef.current;
+        const piecediv = piecedivref.current;
 
         const onMouseDown = (e: MouseEvent) => {
             isClicked.current = true;
@@ -66,26 +66,26 @@ export function PieceComponent(props: { piece: Piece | undefined }) {
 
         const onMouseUp = (e: MouseEvent) => {
             isClicked.current = false;
-            coords.current.lastx = e.clientX;
-            coords.current.lasty = e.clientY;
+            coords.current.lastx = piecediv.offsetLeft;
+            coords.current.lasty = piecediv.offsetTop;
         };
 
         const onMouseMove = (e: MouseEvent) => {
             if (!isClicked.current) return;
             const nextx = e.clientX - coords.current.startx + coords.current.lastx;
             const nexty = e.clientY - coords.current.starty + coords.current.lasty;
-            container.style.top = `${nextx}px`;
-            container.style.left = `${nexty}px`;
+            piecediv.style.left = `${nextx}px`;
+            piecediv.style.top = `${nexty}px`;
         };
 
-        container.addEventListener("mousedown", onMouseDown);
-        container.addEventListener("mouseup", onMouseUp);
-        container.addEventListener("mousemove", onMouseMove);
+        piecediv.addEventListener("mousedown", onMouseDown);
+        piecediv.addEventListener("mouseup", onMouseUp);
+        mainbody.addEventListener("mousemove", onMouseMove);
 
         const cleanup = () => {
-            container.removeEventListener("mousedown", onMouseDown);
-            container.removeEventListener("mouseup", onMouseUp);
-            container.removeEventListener("mousemove", onMouseMove);
+            piecediv.removeEventListener("mousedown", onMouseDown);
+            piecediv.removeEventListener("mouseup", onMouseUp);
+            mainbody.removeEventListener("mousemove", onMouseMove);
         }
 
         return cleanup;
