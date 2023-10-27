@@ -12,7 +12,7 @@ export function turnBoard(board: Array<Array<PositionInfo>>, size: number, setBo
 }
 
 function is_numeric(str: string) {
-    return /^\d$/.test(str);
+    return /^\d+$/.test(str);
 }
 
 export function loadPosition(fen: string, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {

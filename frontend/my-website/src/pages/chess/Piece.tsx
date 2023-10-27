@@ -19,7 +19,6 @@ export type PieceColor = 'white' | 'black';
 export type PieceMap = { [K in PieceType]: (color: PieceColor) => JSX.Element };
 export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 
-
 export interface Piece {
     position: Position;
     type: PieceType;
@@ -39,6 +38,8 @@ export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: Re
     const piecedivref = useRef<HTMLDivElement>(null);
 
     const isClicked = useRef<boolean>(false);
+
+    const zIndex = useRef<string>("0");
 
     const coords = useRef<{
         startx: number,
@@ -60,14 +61,17 @@ export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: Re
 
         const onMouseDown = (e: MouseEvent) => {
             isClicked.current = true;
+            zIndex.current = piecediv.style.zIndex;
             coords.current.startx = e.clientX;
             coords.current.starty = e.clientY;
+            piecediv.style.zIndex = "1000";
         };
 
         const onMouseUp = (e: MouseEvent) => {
             isClicked.current = false;
             coords.current.lastx = piecediv.offsetLeft;
             coords.current.lasty = piecediv.offsetTop;
+            piecediv.style.zIndex = zIndex.current.toString();
         };
 
         const onMouseMove = (e: MouseEvent) => {
