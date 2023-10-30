@@ -1,6 +1,20 @@
-import { PieceColor, PieceType, PositionInfo } from "pages/chess/Piece";
+import { PieceColor, PieceType, PositionInfo, Move } from "pages/chess/Constants";
 
-export function turnBoard(board: Array<Array<PositionInfo>>, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {
+export function movePiece(move: Move, board: Array<Array<PositionInfo>>) {
+    let length: number = board.length;
+    let result = new Array<Array<PositionInfo>>(length);
+    for (let i: number = 0; i < length; i++) {
+        result[i] = new Array<PositionInfo>(length);
+        for (let j: number = 0; j < length; j++) {
+            result[i][j] = board[i][j];
+        }
+    }
+    result[move.to[0]][move.to[1]] = result[move.from[0]][move.from[1]];
+    result[move.from[0]][move.from[1]] = [undefined, undefined];
+    return result;
+}
+
+export function turnBoard(board: Array<Array<PositionInfo>>, size: number) {
     let result = new Array<Array<PositionInfo>>(size);
     for (let i: number = 0; i < size; i++) {
         result[i] = new Array<PositionInfo>(size);
@@ -8,14 +22,14 @@ export function turnBoard(board: Array<Array<PositionInfo>>, size: number, setBo
             result[i][j] = board[size - 1 - i][size - 1 - j];
         }
     }
-    setBoard(result);
+    return result;
 }
 
 function is_numeric(str: string) {
     return /^\d+$/.test(str);
 }
 
-export function loadPosition(fen: string, size: number, setBoard: (board: Array<Array<PositionInfo>>) => void) {
+export function loadPosition(fen: string, size: number) {
     let result = new Array<Array<PositionInfo>>(size);
     for (let i: number = 0; i < size; i++) {
         result[i] = new Array<PositionInfo>(size);
@@ -37,5 +51,5 @@ export function loadPosition(fen: string, size: number, setBoard: (board: Array<
             colnumber += 1;
         }
     }
-    setBoard(result);
+    return result;
 }

@@ -1,68 +1,42 @@
 import "pages/test/test.css";
-import { useEffect, useRef } from "react";
+import { useDrag, useDrop } from "react-dnd";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 export default function Test() {
-    const containerref = useRef<HTMLDivElement>(null);
-    const boxref = useRef<HTMLDivElement>(null);
-
-    const isClicked = useRef<boolean>(false);
-
-    const coords = useRef<{
-        startx: number,
-        starty: number,
-        lastx: number,
-        lasty: number
-    }>({
-        startx: 0,
-        starty: 0,
-        lastx: 0,
-        lasty: 0
-    });
-
-    useEffect(() => {
-        if (!containerref.current || !boxref.current) return;
-
-        const container = containerref.current;
-        const box = boxref.current;
-
-        const onMouseDown = (e: MouseEvent) => {
-            isClicked.current = true;
-            coords.current.startx = e.clientX;
-            coords.current.starty = e.clientY;
-        };
-
-        const onMouseUp = (e: MouseEvent) => {
-            isClicked.current = false;
-            coords.current.lastx = box.offsetLeft;
-            coords.current.lasty = box.offsetTop;
-        };
-
-        const onMouseMove = (e: MouseEvent) => {
-            if (!isClicked.current) return;
-            const nextx = e.clientX - coords.current.startx + coords.current.lastx;
-            const nexty = e.clientY - coords.current.starty + coords.current.lasty;
-            box.style.left = `${nextx}px`;
-            box.style.top = `${nexty}px`;
-        };
-
-        box.addEventListener("mousedown", onMouseDown);
-        box.addEventListener("mouseup", onMouseUp);
-        container.addEventListener("mousemove", onMouseMove);
-
-        const cleanup = () => {
-            box.removeEventListener("mousedown", onMouseDown);
-            box.removeEventListener("mouseup", onMouseUp);
-            container.removeEventListener("mousemove", onMouseMove);
-        }
-
-        return cleanup;
-    }, []);
 
     return (
-        <div ref={containerref} className="testmainbox">
-            <div className="testcontainer">
-                <div ref={boxref} className="testbox"></div>
+        <DndProvider backend={HTML5Backend}>
+            <div className="testmainbox">
+                <div className="testcontainer">
+                    <Dragbox />
+                </div>
+                <Goal />
             </div>
-        </div>
+        </DndProvider>
     );
+}
+
+function Goal() {
+    const [{ isOver }, dropRef] = useDrop(() => ({
+        accept: "dragbox",
+        drop: () => { },
+        collect: (monitor) => ({
+            isOver: monitor.isOver()
+        })
+    }));
+
+    return (
+        <div ref={dropRef} className="testcontainer">
+            {isOver && (<div style={{ backgroundColor: "yellow", height: "100%", width: "100%" }}></div>)}
+        </div>
+    )
+}
+
+function Dragbox() {
+    const [, dragRef] = useDrag({
+        type: "dragbox"
+    })
+
+    return <div ref={dragRef} className="testbox"></div>
 }

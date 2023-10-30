@@ -1,14 +1,12 @@
 .piecesvg {
     height: 90%;
     width: 90%;
+    cursor: pointer;
 }
 
 .piececontainer {
     height: 100%;
     width: 100%;
-    position: absolute;
-    cursor: pointer;
-    overflow: visible;
     flex-direction: column;
     justify-content: center;
     align-items: center;

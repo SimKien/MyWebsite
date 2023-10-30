@@ -11,99 +11,27 @@ import BishopBlackSVG from "assets/bishopblack.svg";
 import PawnWhiteSVG from "assets/pawnwhite.svg";
 import PawnBlackSVG from "assets/pawnblack.svg";
 import "pages/chess/Piece.css"
-import { useEffect, useRef } from "react";
-
-export type Position = [number, number];
-export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
-export type PieceColor = 'white' | 'black';
-export type PieceMap = { [K in PieceType]: (color: PieceColor) => JSX.Element };
-export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
-
-export interface Piece {
-    position: Position;
-    type: PieceType;
-    color: PieceColor;
-}
+import { useDrag } from "react-dnd";
+import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece } from "pages/chess/Constants";
 
 const PIECE_MAP: PieceMap = {
-    K: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={KingWhiteSVG} alt="King White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={KingBlackSVG} alt="King Black"></img>,
-    Q: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={QueenWhiteSVG} alt="Queen White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={QueenBlackSVG} alt="Queen Black"></img>,
-    R: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={RookWhiteSVG} alt="Rook White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={RookBlackSVG} alt="Rook Black"></img>,
-    B: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={BishopWhiteSVG} alt="Bishop White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={BishopBlackSVG} alt="Bishop Black"></img>,
-    N: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
-    P: (color: PieceColor) => color === 'white' ? <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img onDragStart={(e) => e.preventDefault()} className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
+    "K": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" src={KingBlackSVG} alt="King Black"></img>,
+    "Q": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" src={QueenBlackSVG} alt="Queen Black"></img>,
+    "R": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" src={RookBlackSVG} alt="Rook Black"></img>,
+    "B": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piecesvg" src={BishopBlackSVG} alt="Bishop Black"></img>,
+    "N": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> : <img className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
+    "P": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
 };
 
-export function PieceComponent(props: { piece: Piece | undefined, mainbodyef: React.RefObject<HTMLDivElement> }) {
-    const piecedivref = useRef<HTMLDivElement>(null);
+export function PieceComponent(props: { piece: Piece }) {
+    const [, drag] = useDrag({
+        type: Piece_dnd_type,
+        item: props.piece
+    })
 
-    const isClicked = useRef<boolean>(false);
-
-    const zIndex = useRef<string>("0");
-
-    const coords = useRef<{
-        startx: number,
-        starty: number,
-        lastx: number,
-        lasty: number
-    }>({
-        startx: 0,
-        starty: 0,
-        lastx: 0,
-        lasty: 0
-    });
-
-    useEffect(() => {
-        if (!props.mainbodyef.current || !piecedivref.current) return;
-
-        const mainbody = props.mainbodyef.current;
-        const piecediv = piecedivref.current;
-
-        const onPointerDown = (e: PointerEvent) => {
-            isClicked.current = true;
-            zIndex.current = piecediv.style.zIndex;
-            coords.current.startx = e.clientX;
-            coords.current.starty = e.clientY;
-            piecediv.style.zIndex = "1000";
-        };
-
-        const onPointerUp = (e: PointerEvent) => {
-            isClicked.current = false;
-            coords.current.lastx = piecediv.offsetLeft;
-            coords.current.lasty = piecediv.offsetTop;
-            piecediv.style.zIndex = zIndex.current.toString();
-        };
-
-        const onPointerMove = (e: PointerEvent) => {
-            if (!isClicked.current) return;
-            const nextx = e.clientX - coords.current.startx + coords.current.lastx;
-            const nexty = e.clientY - coords.current.starty + coords.current.lasty;
-            piecediv.style.left = `${nextx}px`;
-            piecediv.style.top = `${nexty}px`;
-        };
-
-        piecediv.addEventListener("pointerdown", onPointerDown);
-        piecediv.addEventListener("pointerup", onPointerUp);
-        mainbody.addEventListener("pointermove", onPointerMove);
-        mainbody.addEventListener("pointerleave", onPointerUp);
-
-        const cleanup = () => {
-            piecediv.removeEventListener("pointerdown", onPointerDown);
-            piecediv.removeEventListener("pointerup", onPointerUp);
-            mainbody.removeEventListener("pointermove", onPointerMove);
-            mainbody.removeEventListener("pointerleave", onPointerUp);
-        }
-
-        return cleanup;
-    }, []);
-
-    if (props.piece === undefined) {
-        return <div ref={piecedivref} className="piececontainer"></div>;
-    } else {
-        return (
-            <div ref={piecedivref} className="piececontainer">
-                {PIECE_MAP[props.piece.type](props.piece.color)}
-            </div>
-        );
-    }
+    return (
+        <div ref={drag} className="piececontainer" >
+            {PIECE_MAP[props.piece.type](props.piece.color)}
+        </div>
+    );
 }
