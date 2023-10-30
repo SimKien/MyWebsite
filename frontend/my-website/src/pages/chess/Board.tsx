@@ -6,11 +6,6 @@ import { turnBoard, loadPosition, movePiece } from "pages/chess/BoardOperations"
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-
-//TODO: probably replace useState in Board (what is useReducer?)
-//TODO: make Piece in Square invisible when dragging
-
-
 export default function Board() {
     const size = 8;
     const [board, setBoard] = useState<Array<Array<PositionInfo>>>(new Array<Array<PositionInfo>>());
@@ -43,6 +38,8 @@ export default function Board() {
 }
 
 function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number, makeMove: (move: Move) => void }) {
+    const hovered_style = { backgroundColor: 'darkgreen', opacity: "0.4", height: "100%", width: "100%" };
+
     const pieceRef = useRef<Piece | undefined>();
 
     const onDrop = (item: Piece) => {
@@ -54,11 +51,12 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
         props.makeMove(move);
     }
 
-    const [{ isOver }, drop] = useDrop({
+    const [{ isOver, isOverOriginField }, drop] = useDrop({
         accept: Piece_dnd_type,
         drop: (item, _) => onDrop(item as Piece),
         collect: (monitor) => ({
             isOver: monitor.isOver(),
+            isOverOriginField: monitor.getItem() === null ? false : (monitor.getItem() as Piece).position[0] === props.rindex && (monitor.getItem() as Piece).position[1] === props.cindex
         })
     });
 
@@ -67,7 +65,7 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
         return (
             <div id={`r${props.rindex}c${props.cindex}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? Color.White : Color.Black}`}
                 ref={drop}>
-                {isOver ? <div style={{ backgroundColor: 'yellow', height: "100%", width: "100%" }}></div> : <></>}
+                {(isOver && !isOverOriginField) ? <div style={hovered_style}></div> : <></>}
             </div>
         );
     } else {
@@ -80,8 +78,8 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
         return (
             <div id={`r${props.rindex}c${props.cindex}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? Color.White : Color.Black}`}
                 ref={drop}>
-                {isOver ? (
-                    <div style={{ backgroundColor: 'yellow', height: "100%", width: "100%" }}>
+                {(isOver && !isOverOriginField) ? (
+                    <div style={hovered_style}>
                         <PieceComponent piece={pieceRef.current} />
                     </div>
                 ) :

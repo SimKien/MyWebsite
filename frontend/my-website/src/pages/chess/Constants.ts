@@ -29,5 +29,8 @@ export type PieceColor = 'white' | 'black';
 export const Piece_dnd_type = "Piece"
 
 export type Position = [number, number];
-export type PieceMap = { [K in PieceType]: (color: PieceColor) => JSX.Element };
+export type PieceMap = { [K in PieceType]: (color: PieceColor, opacity: string) => JSX.Element };
 export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
+
+export const draggingOpacity: string = "0.4";
+export const nonDraggingOpacity: string = "1.0";

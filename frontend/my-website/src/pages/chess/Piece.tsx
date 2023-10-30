@@ -12,26 +12,29 @@ import PawnWhiteSVG from "assets/pawnwhite.svg";
 import PawnBlackSVG from "assets/pawnblack.svg";
 import "pages/chess/Piece.css"
 import { useDrag } from "react-dnd";
-import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece } from "pages/chess/Constants";
+import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece, draggingOpacity, nonDraggingOpacity } from "pages/chess/Constants";
 
 const PIECE_MAP: PieceMap = {
-    "K": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" src={KingBlackSVG} alt="King Black"></img>,
-    "Q": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" src={QueenBlackSVG} alt="Queen Black"></img>,
-    "R": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" src={RookBlackSVG} alt="Rook Black"></img>,
-    "B": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piecesvg" src={BishopBlackSVG} alt="Bishop Black"></img>,
-    "N": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={KnightWhiteSVG} alt="Knight White"></img> : <img className="piecesvg" src={KnightBlackSVG} alt="Knight Black"></img>,
-    "P": (color: PieceColor) => color === Color.White ? <img className="piecesvg" src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piecesvg" src={PawnBlackSVG} alt="Pawn Black"></img>
+    "K": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={KingBlackSVG} alt="King Black"></img>,
+    "Q": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={QueenBlackSVG} alt="Queen Black"></img>,
+    "R": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={RookBlackSVG} alt="Rook Black"></img>,
+    "B": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={BishopWhiteSVG} alt="Bishop White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={BishopBlackSVG} alt="Bishop Black"></img>,
+    "N": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={KnightWhiteSVG} alt="Knight White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={KnightBlackSVG} alt="Knight Black"></img>,
+    "P": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={PawnWhiteSVG} alt="Pawn White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={PawnBlackSVG} alt="Pawn Black"></img>
 };
 
 export function PieceComponent(props: { piece: Piece }) {
-    const [, drag] = useDrag({
+    const [{ isDragging }, drag] = useDrag({
         type: Piece_dnd_type,
-        item: props.piece
+        item: props.piece,
+        collect: (monitor) => ({
+            isDragging: !!monitor.isDragging(),
+        })
     })
 
     return (
-        <div ref={drag} className="piececontainer" >
-            {PIECE_MAP[props.piece.type](props.piece.color)}
+        <div ref={drag} className="piececontainer">
+            {isDragging ? PIECE_MAP[props.piece.type](props.piece.color, draggingOpacity) : PIECE_MAP[props.piece.type](props.piece.color, nonDraggingOpacity)}
         </div>
     );
 }

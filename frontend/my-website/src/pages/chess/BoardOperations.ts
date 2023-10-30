@@ -9,8 +9,9 @@ export function movePiece(move: Move, board: Array<Array<PositionInfo>>) {
             result[i][j] = board[i][j];
         }
     }
-    result[move.to[0]][move.to[1]] = result[move.from[0]][move.from[1]];
+    let temp = result[move.from[0]][move.from[1]];
     result[move.from[0]][move.from[1]] = [undefined, undefined];
+    result[move.to[0]][move.to[1]] = temp;
     return result;
 }
 
