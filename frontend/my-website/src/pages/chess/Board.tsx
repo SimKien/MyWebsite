@@ -6,15 +6,14 @@ import { turnBoard, loadPosition, movePiece } from "pages/chess/BoardOperations"
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-export default function Board() {
+export default function Board(props: { fen: string }) {
     const size = 8;
     const [board, setBoard] = useState<Array<Array<PositionInfo>>>(new Array<Array<PositionInfo>>());
-    const [fen, setFEN] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     useEffect(() => {
-        let result = loadPosition(fen, size);
+        let result = loadPosition(props.fen, size);
         setBoard(result);
-    }, [fen]);
+    }, [props.fen]);
 
     const makeMove = (move: Move) => {
         let result = movePiece(move, board);
