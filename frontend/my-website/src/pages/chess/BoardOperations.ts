@@ -1,4 +1,4 @@
-import { PieceColor, PieceType, PositionInfo, Move } from "pages/chess/Constants";
+import { PieceColor, PieceType, PositionInfo, Move, Color } from "pages/chess/Constants";
 
 export function movePiece(move: Move, board: Array<Array<PositionInfo>>) {
     let length: number = board.length;
@@ -48,7 +48,7 @@ export function loadPosition(fen: string, size: number) {
         } else if (is_numeric(letter)) {
             colnumber += parseInt(letter);
         } else {
-            result[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? "white" : "black" as PieceColor];
+            result[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? Color.White as PieceColor : Color.Black as PieceColor];
             colnumber += 1;
         }
     }

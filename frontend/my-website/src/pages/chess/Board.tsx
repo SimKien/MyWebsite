@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "pages/chess/Board.css";
 import { PieceComponent } from "pages/chess/Piece";
 import { Color, PieceColor, PieceType, PositionInfo, Piece_dnd_type, Piece, Move } from "pages/chess/Constants"
-import { turnBoard, loadPosition, movePiece } from "pages/chess/BoardOperations";
+import { loadPosition, movePiece } from "pages/chess/BoardOperations";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
