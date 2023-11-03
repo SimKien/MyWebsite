@@ -10,9 +10,9 @@ import BishopWhiteSVG from "assets/bishopwhite.svg";
 import BishopBlackSVG from "assets/bishopblack.svg";
 import PawnWhiteSVG from "assets/pawnwhite.svg";
 import PawnBlackSVG from "assets/pawnblack.svg";
-import "pages/chess/Piece.css"
+import "pages/chess/style/Piece.css"
 import { useDrag } from "react-dnd";
-import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece, draggingOpacity, nonDraggingOpacity } from "pages/chess/Constants";
+import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece, draggingOpacity, nonDraggingOpacity } from "pages/chess/lib/constants/ChessConstants";
 
 const PIECE_MAP: PieceMap = {
     "K": (color: PieceColor, opacity: string) => color === Color.White ? <img className="piecesvg" style={{ opacity: opacity }} src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={KingBlackSVG} alt="King Black"></img>,

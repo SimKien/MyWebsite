@@ -1,32 +1,32 @@
-import { useEffect, useRef, useState } from "react";
-import "pages/chess/Board.css";
-import { PieceComponent } from "pages/chess/Piece";
-import { Color, PieceColor, PieceType, PositionInfo, Piece_dnd_type, Piece, Move } from "pages/chess/Constants"
-import { loadPosition, movePiece } from "pages/chess/BoardOperations";
+import { useRef } from "react";
+import "pages/chess/style/Board.css";
+import { PieceComponent } from "pages/chess/components/Piece";
+import { Color, PieceColor, PieceType, PositionInfo, Piece_dnd_type, Piece, Move } from "pages/chess/lib/constants/ChessConstants"
+import { loadPosition, movePiece } from "pages/chess/lib/BoardOperations";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Signal, effect, signal } from "@preact/signals-react";
 
-export default function Board(props: { fen: string }) {
-    const size = 8;
-    const [board, setBoard] = useState<Array<Array<PositionInfo>>>(new Array<Array<PositionInfo>>());
+const size = 8;
+const board = signal<PositionInfo[][]>((new Array(size).fill(new Array(size).fill([undefined, undefined]))) as PositionInfo[][]);
 
-    useEffect(() => {
-        let result = loadPosition(props.fen, size);
-        setBoard(result);
-    }, [props.fen]);
+export default function Board(props: { fen: Signal<string> }) {
+
+    effect(() => {
+        loadPosition(props.fen.value, size, board.value);
+    })
 
     const makeMove = (move: Move) => {
-        let result = movePiece(move, board);
-        setBoard(result);
+        movePiece(move, board.value);
     }
 
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="board" id="mainboard">
                 {
-                    board.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
+                    board.value.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
                         row.map((_, cindex) => {
-                            return <Square key={cindex.toString()} positionInfo={board[rindex][cindex]} rindex={rindex} cindex={cindex}
+                            return <Square key={cindex.toString()} rindex={rindex} cindex={cindex}
                                 makeMove={makeMove} />
                         })
                     }</div>)
@@ -36,10 +36,12 @@ export default function Board(props: { fen: string }) {
     );
 }
 
-function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: number, makeMove: (move: Move) => void }) {
+function Square(props: { rindex: number, cindex: number, makeMove: (move: Move) => void }) {
     const hovered_style = { backgroundColor: 'darkgreen', opacity: "0.4", height: "100%", width: "100%" };
 
     const pieceRef = useRef<Piece | undefined>();
+
+    const positionInfo = board.value[props.rindex][props.cindex];
 
     const onDrop = (item: Piece) => {
         let move: Move = {
@@ -59,7 +61,7 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
         })
     });
 
-    if (props.positionInfo[0] === undefined || props.positionInfo[1] === undefined) {
+    if (positionInfo[0] === undefined || positionInfo[1] === undefined) {
         pieceRef.current = undefined;
         return (
             <div id={`r${props.rindex}c${props.cindex}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? Color.White : Color.Black}`}
@@ -70,8 +72,8 @@ function Square(props: { positionInfo: PositionInfo, rindex: number, cindex: num
     } else {
         let newPiece: Piece = {
             position: [props.rindex, props.cindex],
-            type: props.positionInfo[0] as PieceType,
-            color: props.positionInfo[1] as PieceColor
+            type: positionInfo[0] as PieceType,
+            color: positionInfo[1] as PieceColor
         }
         pieceRef.current = newPiece;
         return (
