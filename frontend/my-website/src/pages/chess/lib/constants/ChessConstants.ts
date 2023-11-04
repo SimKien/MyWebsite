@@ -17,14 +17,28 @@ export interface Piece {
 export type Move = {
     from: Position,
     to: Position,
-    movedPiece: Piece
+    movedPiece: Piece,
+    boardOrientation: string
 };
+
+export const colToLetter = new Map<number, string>([
+    [0, "a"],
+    [1, "b"],
+    [2, "c"],
+    [3, "d"],
+    [4, "e"],
+    [5, "f"],
+    [6, "g"],
+    [7, "h"]
+]);
 
 export const Color = {
     White: "white",
     Black: "black"
 }
 export type PieceColor = 'white' | 'black';
+
+export const BoardSize = 8;
 
 export const Piece_dnd_type = "Piece"
 

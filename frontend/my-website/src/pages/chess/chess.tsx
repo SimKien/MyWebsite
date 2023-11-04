@@ -1,19 +1,24 @@
 import Board from "pages/chess/components/Board";
 import "pages/chess/style/Chess.css"
-import "pages/chess/lib/Websocket"
-import { WebsocketCLient } from "pages/chess/lib/Websocket";
-import { chessServerEndpoint } from "pages/chess/lib/constants/WebsocketConstants";
-import { signal } from "@preact/signals-react";
+import "pages/chess/lib/websocket/Websocket"
+import { Signal, signal } from "@preact/signals-react";
+import { Session } from "pages/chess/lib/Game";
+import { useEffect } from "react";
 
-const fen = signal<string>("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+const boardPosition: Signal<string> = signal<string>("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+const session = signal<Session>(new Session());
 
 export default function Chess() {
-    const webSocket = new WebsocketCLient(chessServerEndpoint)
-    webSocket.addHandler(console.log)
+
+    useEffect(() => {
+        session.value.generateSession();
+        boardPosition.value = session.value.getBoardPosition();
+    }, []);
 
     return (
         <div className="mainbody">
-            <Board fen={fen} />
+            <Board boardPosition={boardPosition.value} reportMove={session.value.reportMove} player={session.value.player} />
+            <button onClick={() => { }}>Flip Board</button>
         </div>
     );
 }

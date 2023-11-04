@@ -1,23 +1,44 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import "pages/chess/style/Board.css";
 import { PieceComponent } from "pages/chess/components/Piece";
-import { Color, PieceColor, PieceType, PositionInfo, Piece_dnd_type, Piece, Move } from "pages/chess/lib/constants/ChessConstants"
-import { loadPosition, movePiece } from "pages/chess/lib/BoardOperations";
+import { Color, PieceColor, PieceType, PositionInfo, Piece_dnd_type, Piece, Move, BoardSize } from "pages/chess/lib/constants/ChessConstants"
+import { loadPosition, movePiece, turnBoard } from "pages/chess/lib/BoardOperations";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Signal, effect, signal } from "@preact/signals-react";
+import { signal } from "@preact/signals-react";
+import { Player } from "pages/chess/lib/Game";
 
-const size = 8;
-const board = signal<PositionInfo[][]>((new Array(size).fill(new Array(size).fill([undefined, undefined]))) as PositionInfo[][]);
+const board = signal<PositionInfo[][]>((new Array(BoardSize).fill(new Array(BoardSize).fill([undefined, undefined]))) as PositionInfo[][]);
+const boardOrientation = signal<PieceColor>(Color.White as PieceColor);
 
-export default function Board(props: { fen: Signal<string> }) {
+export default function Board(props: { boardPosition: string, reportMove: (move: Move) => void, player: Player }) {
 
-    effect(() => {
-        loadPosition(props.fen.value, size, board.value);
-    })
+    const flipBoard = () => {
+        turnBoard(board.value, BoardSize);
+        boardOrientation.value = boardOrientation.value === Color.White ? Color.Black as PieceColor : Color.White as PieceColor;
+    };
+
+    useEffect(() => {
+        loadPosition(props.boardPosition, BoardSize, board.value);
+        if (boardOrientation.value === Color.Black) {
+            turnBoard(board.value, BoardSize)
+        }
+    }, [props.boardPosition]);
+
+    useEffect(() => {
+        if (boardOrientation.value === props.player.color) return;
+        if (props.player.color === Color.Black) {
+            turnBoard(board.value, BoardSize)
+            boardOrientation.value = Color.Black as PieceColor;
+        } else {
+            turnBoard(board.value, BoardSize)
+            boardOrientation.value = Color.White as PieceColor;
+        }
+    }, [props.player.color]);
 
     const makeMove = (move: Move) => {
         movePiece(move, board.value);
+        props.reportMove(move);
     }
 
     return (
@@ -47,7 +68,8 @@ function Square(props: { rindex: number, cindex: number, makeMove: (move: Move) 
         let move: Move = {
             from: item.position,
             to: [props.rindex, props.cindex],
-            movedPiece: item
+            movedPiece: item,
+            boardOrientation: boardOrientation.value
         }
         props.makeMove(move);
     }

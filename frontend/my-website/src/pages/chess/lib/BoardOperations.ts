@@ -25,17 +25,16 @@ function is_numeric(str: string) {
     return /^\d+$/.test(str);
 }
 
-export function loadPosition(fen: string, size: number, board: PositionInfo[][]) {
+export function loadPosition(boardPosition: string, size: number, board: PositionInfo[][]) {
     for (let i: number = 0; i < size; i++) {
         board[i] = new Array<PositionInfo>(size);
         for (let j: number = 0; j < size; j++) {
             board[i][j] = [undefined, undefined];
         }
     }
-    let pos = fen.split(" ")[0];
     let rownumber = 0;
     let colnumber = 0;
-    for (let letter of pos) {
+    for (let letter of boardPosition) {
         if (letter === "/") {
             rownumber += 1;
             colnumber = 0;
