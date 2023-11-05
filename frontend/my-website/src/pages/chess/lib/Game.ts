@@ -31,7 +31,7 @@ export class Session {
     player: Player;
     connection: WebsocketCLient;
 
-    //current valid Moves
+    //TODO: add current valid Moves
 
     constructor() {
         this.player = new Player(Color.White as PieceColor, "", "");
@@ -40,21 +40,25 @@ export class Session {
     }
 
     generateSession() {
-        // ask Server for Player and set Player
+        //TODO: ask Server for Player and set Player
     }
 
     getBoardPosition() {
-        // ask Server for Board Position
+        //TODO: ask Server for Board Position
 
         return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
     }
 
+    getValidMoves() {
+        //TODO: get Valid Moves from Server
+    }
+
     reportMove = (move: Move) => {
         let moveInfo: MoveInformation = getMoveInformation(move)
-        this.connection.send(JSON.stringify(moveInfo))
+        //this.connection.send(JSON.stringify(moveInfo))
     }
 
     receiveMove = () => {
-        // Receive Move from Server
+        //TODO: Receive Move from Server
     }
 }

@@ -1,4 +1,4 @@
-import { BoardSize, Color, colToLetter, Move, PieceColor } from "pages/chess/lib/constants/ChessConstants";
+import { BoardSize, Color, colToLetter, Move } from "pages/chess/lib/constants/ChessConstants";
 
 export const getMoveInformation = (move: Move) => {
     let boardOrientation = move.boardOrientation

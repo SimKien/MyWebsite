@@ -1,35 +1,40 @@
-import { PieceColor, PieceType, PositionInfo, Move, Color } from "pages/chess/lib/constants/ChessConstants";
+import { Move } from "pages/chess/lib/constants/ChessConstants";
 
-export function movePiece(move: Move, board: PositionInfo[][]) {
-    let temp = board[move.from[0]][move.from[1]];
-    board[move.from[0]][move.from[1]] = [undefined, undefined];
-    board[move.to[0]][move.to[1]] = temp;
+export function movePiece(move: Move, board: string[][]) {
+    let result = new Array<Array<string>>(board.length);
+    for (let i: number = 0; i < board.length; i++) {
+        result[i] = new Array<string>(board.length);
+        for (let j: number = 0; j < board.length; j++) {
+            result[i][j] = board[i][j];
+        }
+    }
+    let temp = result[move.from[0]][move.from[1]];
+    result[move.from[0]][move.from[1]] = "";
+    result[move.to[0]][move.to[1]] = temp;
+    return result;
 }
 
-export function turnBoard(board: PositionInfo[][], size: number) {
-    let result = new Array<Array<PositionInfo>>(size);
+export function turnBoard(board: string[][], size: number) {
+    let result = new Array<Array<string>>(size);
     for (let i: number = 0; i < size; i++) {
-        result[i] = new Array<PositionInfo>(size);
+        result[i] = new Array<string>(size);
         for (let j: number = 0; j < size; j++) {
             result[i][j] = board[size - 1 - i][size - 1 - j];
         }
     }
-    for (let i: number = 0; i < size; i++) {
-        for (let j: number = 0; j < size; j++) {
-            board[i][j] = result[i][j];
-        }
-    }
+    return result;
 }
 
 function is_numeric(str: string) {
     return /^\d+$/.test(str);
 }
 
-export function loadPosition(boardPosition: string, size: number, board: PositionInfo[][]) {
+export function loadPosition(boardPosition: string, size: number) {
+    let result = new Array<Array<string>>(size);
     for (let i: number = 0; i < size; i++) {
-        board[i] = new Array<PositionInfo>(size);
+        result[i] = new Array<string>(size);
         for (let j: number = 0; j < size; j++) {
-            board[i][j] = [undefined, undefined];
+            result[i][j] = "";
         }
     }
     let rownumber = 0;
@@ -41,8 +46,9 @@ export function loadPosition(boardPosition: string, size: number, board: Positio
         } else if (is_numeric(letter)) {
             colnumber += parseInt(letter);
         } else {
-            board[rownumber][colnumber] = [letter.toUpperCase() as PieceType, letter === letter.toUpperCase() ? Color.White as PieceColor : Color.Black as PieceColor];
+            result[rownumber][colnumber] = letter;
             colnumber += 1;
         }
     }
+    return result;
 }

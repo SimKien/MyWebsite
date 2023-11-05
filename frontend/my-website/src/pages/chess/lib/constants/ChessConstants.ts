@@ -1,3 +1,29 @@
+export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
+export type PieceColor = 'white' | 'black';
+
+export type Position = [number, number];
+export type PieceMap = { [K in PieceType]: (color: PieceColor, opacity: string) => JSX.Element };
+export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
+
+//public operations on the board-component
+export interface BoardOperations {
+    flipBoard: () => void;
+    makeMove: (move: Move) => void
+}
+
+export interface Piece {
+    position: Position;
+    type: PieceType;
+    color: PieceColor;
+}
+
+export interface Move {
+    from: Position;
+    to: Position;
+    movedPiece: Piece;
+    boardOrientation: string
+};
+
 export const Piece_names = {
     King: "K",
     Queen: "Q",
@@ -6,20 +32,6 @@ export const Piece_names = {
     Knight: "N",
     Pawn: "P"
 }
-export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
-
-export interface Piece {
-    position: Position;
-    type: PieceType;
-    color: PieceColor;
-}
-
-export type Move = {
-    from: Position,
-    to: Position,
-    movedPiece: Piece,
-    boardOrientation: string
-};
 
 export const colToLetter = new Map<number, string>([
     [0, "a"],
@@ -36,15 +48,10 @@ export const Color = {
     White: "white",
     Black: "black"
 }
-export type PieceColor = 'white' | 'black';
-
-export const BoardSize = 8;
-
-export const Piece_dnd_type = "Piece"
-
-export type Position = [number, number];
-export type PieceMap = { [K in PieceType]: (color: PieceColor, opacity: string) => JSX.Element };
-export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 
 export const draggingOpacity: string = "0.4";
 export const nonDraggingOpacity: string = "1.0";
+
+export const Piece_dnd_type = "Piece"
+
+export const BoardSize = 8;
