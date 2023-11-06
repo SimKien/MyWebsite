@@ -9,8 +9,8 @@ export type MoveInformation = {
     to: string
 }
 
-export type FenInformation = {
-    fen: string
+export type BoardInformation = {
+    boardString: string
 }
 
 export type InitInformation = {

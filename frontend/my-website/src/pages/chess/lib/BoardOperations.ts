@@ -3,10 +3,7 @@ import { Move } from "pages/chess/lib/constants/ChessConstants";
 export function movePiece(move: Move, board: string[][]) {
     let result = new Array<Array<string>>(board.length);
     for (let i: number = 0; i < board.length; i++) {
-        result[i] = new Array<string>(board.length);
-        for (let j: number = 0; j < board.length; j++) {
-            result[i][j] = board[i][j];
-        }
+        result[i] = board[i];
     }
     let temp = result[move.from[0]][move.from[1]];
     result[move.from[0]][move.from[1]] = "";

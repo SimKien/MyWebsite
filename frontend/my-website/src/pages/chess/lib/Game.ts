@@ -1,7 +1,7 @@
 import { PieceColor, Color, Move } from "pages/chess/lib/constants/ChessConstants";
 import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
 import { MoveInformation, chessServerEndpoint } from "pages/chess/lib/constants/WebsocketConstants";
-import { getMoveInformation } from "./websocket/WSDataParser";
+import { getMoveInformation } from "pages/chess/lib/websocket/WSDataParser";
 
 export class Player {
     color: PieceColor;
@@ -30,6 +30,8 @@ export class Player {
 export class Session {
     player: Player;
     connection: WebsocketCLient;
+    validMoves: MoveInformation[];
+    boardPosition: string;
 
     //TODO: add current valid Moves
 
@@ -37,19 +39,23 @@ export class Session {
         this.player = new Player(Color.White as PieceColor, "", "");
         this.connection = new WebsocketCLient(chessServerEndpoint)
         this.connection.addHandler(console.log)
+        this.validMoves = []
+        this.boardPosition = ""
     }
 
     generateSession() {
         //TODO: ask Server for Player and set Player
+        this.player = new Player(Color.White as PieceColor, "", "")
+
+        this.pullBoardPosition()
     }
 
-    getBoardPosition() {
+    pullBoardPosition() {
         //TODO: ask Server for Board Position
-
-        return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+        this.boardPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
     }
 
-    getValidMoves() {
+    pullValidMoves() {
         //TODO: get Valid Moves from Server
     }
 
@@ -59,6 +65,8 @@ export class Session {
     }
 
     receiveMove = () => {
+        this.pullValidMoves()  //after receiving move, get new valid moves
+
         //TODO: Receive Move from Server
     }
 }

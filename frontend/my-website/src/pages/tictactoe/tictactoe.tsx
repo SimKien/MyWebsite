@@ -89,9 +89,9 @@ function Board(props: { setWintext: (text: string) => void }) {
     return (
         <div className="tictactoeboard">
             {board.map((row, rowindex) => {
-                return <div className="tictactoerow">
+                return <div key={rowindex} className="tictactoerow">
                     {row.map((_, colindex) => {
-                        return <Square currentSymbol={currentSymbol} changeSymbol={processMove} row={rowindex} col={colindex} finished={finished} />
+                        return <Square key={colindex} currentSymbol={currentSymbol} changeSymbol={processMove} row={rowindex} col={colindex} finished={finished} />
                     })}
                 </div>;
             })}

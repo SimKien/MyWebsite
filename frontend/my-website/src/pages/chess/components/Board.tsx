@@ -67,8 +67,6 @@ export default function Board(props: { boardPosition: string, reportMove: (move:
 }
 
 function Square(props: { rindex: number, cindex: number, makeMove: (move: Move) => void, piece: string, boardOrientation: PieceColor }) {
-    console.log("rendering square");
-
     const hovered_style = { backgroundColor: 'darkgreen', opacity: "0.4", height: "100%", width: "100%" };
 
     const pieceRef = useRef<Piece | undefined>();
@@ -85,9 +83,27 @@ function Square(props: { rindex: number, cindex: number, makeMove: (move: Move) 
         props.makeMove(move);
     }
 
+    const canDrop = (item: Piece) => {
+
+        //TODO: entweder eine Map in Board mit field -> [possibleMoveField] für alle Felder und dann mit piece.position schauen ob der
+        //      Zug möglich ist oder in das Piece-Interface ein Attribut für die möglichen Zielfelder aufnehmen und hier mit 
+        //      piece.targets auf dieses Zielfeld überprüfen
+        //      Aber nicht vergessen: Zielfelder-Highlighting mit einfügen
+
+        //Idee zur Map-Umsetzung: adde absolute (e2, a7 und so) und relative (matrix, wie bisher mit row,col) Koordinaten.
+        //  Squares können mit den relativen Koordinaten + boardOrientation die absoluten Koordinaten berechnen
+        //  In Move kann man dann auch fromrelative/toRelative und fromAbsolute/toAbsolute einfügen und damit besser die möglichen
+        //  Zielfelder berechnen und man kann die Map dann mit den absoluten Feldern füllen und man muss sie beim flippen des Boards
+        //  nicht neu berechnen
+        //TODO: dann muss man aber immer bei allen bisherigen Positionsangaben das Rel hinzufügen
+
+        return true;
+    }
+
     const [{ isOver, isOverOriginField }, drop] = useDrop({
         accept: Piece_dnd_type,
         drop: (item, _) => onDrop(item as Piece),
+        canDrop: (item, _) => canDrop(item as Piece),
         collect: (monitor) => ({
             isOver: monitor.isOver(),
             isOverOriginField: monitor.getItem() === null ? false : (monitor.getItem() as Piece).position[0] === props.rindex && (monitor.getItem() as Piece).position[1] === props.cindex

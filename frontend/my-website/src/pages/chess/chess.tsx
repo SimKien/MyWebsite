@@ -15,8 +15,8 @@ export default function Chess() {
 
     useEffect(() => {
         session.value.generateSession();
-        boardPosition.value = session.value.getBoardPosition();
-    }, []);
+        boardPosition.value = session.value.boardPosition;
+    }, [boardPosition.value]);
 
     return (
         <div className="mainbody">
