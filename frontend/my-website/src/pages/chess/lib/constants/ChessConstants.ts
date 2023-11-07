@@ -47,7 +47,7 @@ export const colToLetter = new Map<number, string>([
     [7, "h"]
 ]);
 
-export const Color = {
+export const Color: { White: PieceColor, Black: PieceColor } = {
     White: "white",
     Black: "black"
 }

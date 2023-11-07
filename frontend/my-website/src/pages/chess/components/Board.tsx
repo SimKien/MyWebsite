@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 import "pages/chess/style/Board.css";
 import { PieceComponent } from "pages/chess/components/Piece";
-import { Color, PieceColor, PieceType, Piece_dnd_type, Piece, Move, BoardSize, BoardOperations, PositionAbsolute, colToLetter } from "pages/chess/lib/constants/ChessConstants"
+import { Color, PieceColor, PieceType, Piece_dnd_type, Piece, Move, BoardSize, BoardOperations, PositionAbsolute, colToLetter, PositionInfo } from "pages/chess/lib/constants/ChessConstants"
 import { loadPosition, movePiece, turnBoard } from "pages/chess/lib/BoardOperations";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Signal, signal } from "@preact/signals-react";
-import { Player } from "pages/chess/lib/Game";
+import { Player, usePlayerStore } from "pages/chess/lib/Game";
 
 const board = signal<string[][]>((new Array(BoardSize).fill(new Array(BoardSize).fill(""))));
 
@@ -14,6 +14,7 @@ export default function Board(props: {
     boardPosition: Signal<string>, reportMove: (move: Move) => void, player: Signal<Player>,
     boardOperations: BoardOperations, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>
 }) {
+    const playerStore = usePlayerStore();
 
     //TODO: Zielfelder-Highlighting mit einfügen
 
@@ -35,12 +36,14 @@ export default function Board(props: {
         if (boardOrientation.current === props.player.value.color) return;
         if (props.player.value.color === Color.Black) {
             board.value = turnBoard(board.value, BoardSize)
-            boardOrientation.current = Color.Black as PieceColor;
+            boardOrientation.current = Color.Black;
         } else {
             board.value = turnBoard(board.value, BoardSize)
-            boardOrientation.current = Color.White as PieceColor;
+            boardOrientation.current = Color.White;
         }
-    }, [props.player.value.color]);
+        playerStore.setId(props.player.value.id);
+        playerStore.setToken(props.player.value.token);
+    }, [props.player.value]);
 
     const flipBoard = () => {
         board.value = turnBoard(board.value, BoardSize);
@@ -88,8 +91,10 @@ function Square(props: {
         }
     }, [props.boardOrientation])
 
-    const positionInfo = useMemo<[PieceType | undefined, PieceColor | undefined]>(() => {
-        return [props.piece === "" ? undefined : props.piece.toUpperCase() as PieceType, props.piece === "" ? undefined : (props.piece === props.piece.toUpperCase() ? Color.White as PieceColor : Color.Black as PieceColor)]
+    const positionInfo = useMemo<PositionInfo>(() => {
+        const pieceType = props.piece.toUpperCase() as PieceType || undefined;
+        const pieceColor = props.piece === "" ? undefined : (props.piece === props.piece.toUpperCase() ? Color.White : Color.Black);
+        return [pieceType, pieceColor]
     }, [props.piece])
 
     const onDrop = (item: Piece) => {
@@ -131,8 +136,8 @@ function Square(props: {
         let newPiece: Piece = {
             positionRelative: [props.rindex, props.cindex],
             positionAbsolute: posAbsolut,
-            type: positionInfo[0] as PieceType,
-            color: positionInfo[1] as PieceColor
+            type: positionInfo[0],
+            color: positionInfo[1]
         }
         pieceRef.current = newPiece;
         return (

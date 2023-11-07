@@ -28,7 +28,7 @@ export function PieceComponent(props: { piece: Piece }) {
         type: Piece_dnd_type,
         item: props.piece,
         collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
+            isDragging: monitor.isDragging(),
         })
     })
 

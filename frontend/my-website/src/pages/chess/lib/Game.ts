@@ -2,18 +2,38 @@ import { PieceColor, Color, Move, PositionAbsolute } from "pages/chess/lib/const
 import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
 import { MoveInformation, chessServerEndpoint } from "pages/chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-export class Player {
+export interface Player {
     color: PieceColor;
     id: string;
-    passPhrase: string;
-
-    constructor(color: PieceColor, id: string, passPhrase: string) {
-        this.color = color;
-        this.id = id;
-        this.passPhrase = passPhrase;
-    }
+    token: string;
 }
+
+export interface PlayerMetaStore {
+    id: string;
+    token: string;
+    valid: boolean;
+    setId: (id: string) => void;
+    setToken: (passPhrase: string) => void;
+    setValid: (valid: boolean) => void;
+}
+
+
+export const usePlayerStore = create<PlayerMetaStore>()(
+    persist(
+        (set) => ({
+            id: "",
+            token: "",
+            valid: false,
+            setId: (id: string) => set({ id }),
+            setToken: (token: string) => set({ token }),
+            setValid: (valid: boolean) => set({ valid })
+        }),
+        { name: "player" }
+    )
+);
 
 export class Session {
     player: Signal<Player>;
@@ -21,9 +41,8 @@ export class Session {
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
     boardPosition: Signal<string>;
 
-    //TODO: add current valid Moves
-
-    constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>, player: Signal<Player>) {
+    constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
+        player: Signal<Player>) {
         this.connection = new WebsocketCLient(chessServerEndpoint)
         this.connection.addHandler(console.log)
         this.player = player;
@@ -34,17 +53,17 @@ export class Session {
 
     generateSession() {
         //TODO: ask Server for Player and set Player
-        this.player.value = new Player(Color.White as PieceColor, "", "")
+        this.player.value = { color: Color.White, id: "", token: "" }
 
-        this.pullBoardPosition()
-        if (this.player.value.color === Color.Black as PieceColor) {
+        this.fetchBoardState()
+        if (this.player.value.color === Color.Black) {
             this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
             return
         }
         this.pullValidMoves()
     }
 
-    pullBoardPosition() {
+    fetchBoardState() {
         //TODO: ask Server for Board Position
         this.boardPosition.value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
     }
@@ -55,7 +74,7 @@ export class Session {
     }
 
     reportMove = (move: Move) => {
-        let moveInfo: MoveInformation = { from: move.fromAbsolute, to: move.toAbsolute }
+        let moveInfo: MoveInformation = { kind: 'move', from: move.fromAbsolute, to: move.toAbsolute }
         //this.connection.send(JSON.stringify(moveInfo))
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
     }
