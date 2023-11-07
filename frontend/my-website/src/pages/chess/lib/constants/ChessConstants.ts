@@ -1,7 +1,8 @@
 export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
 export type PieceColor = 'white' | 'black';
 
-export type Position = [number, number];
+export type PositionRelative = [number, number];
+export type PositionAbsolute = string;
 export type PieceMap = { [K in PieceType]: (color: PieceColor, opacity: string) => JSX.Element };
 export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 
@@ -12,16 +13,18 @@ export interface BoardOperations {
 }
 
 export interface Piece {
-    position: Position;
+    positionRelative: PositionRelative;
+    positionAbsolute: PositionAbsolute;
     type: PieceType;
     color: PieceColor;
 }
 
 export interface Move {
-    from: Position;
-    to: Position;
-    movedPiece: Piece;
-    boardOrientation: string
+    fromRelative: PositionRelative;
+    toRelative: PositionRelative;
+    fromAbsolute: PositionAbsolute;
+    toAbsolute: PositionAbsolute;
+    movedPiece: Piece
 };
 
 export const Piece_names = {

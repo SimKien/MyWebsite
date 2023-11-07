@@ -5,9 +5,10 @@ export function movePiece(move: Move, board: string[][]) {
     for (let i: number = 0; i < board.length; i++) {
         result[i] = board[i];
     }
-    let temp = result[move.from[0]][move.from[1]];
-    result[move.from[0]][move.from[1]] = "";
-    result[move.to[0]][move.to[1]] = temp;
+    console.log(move.fromAbsolute + " " + move.toAbsolute)
+    let temp = result[move.fromRelative[0]][move.fromRelative[1]];
+    result[move.fromRelative[0]][move.fromRelative[1]] = "";
+    result[move.toRelative[0]][move.toRelative[1]] = temp;
     return result;
 }
 
