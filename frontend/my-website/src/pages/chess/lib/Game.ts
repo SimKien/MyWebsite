@@ -51,24 +51,30 @@ export class Session {
         this.generateSession()
     }
 
+    // Adde einen Handler für die verschiedenen Arten von Nachrichten: Move, newPlayer, newBoardPosition, newValidMoves
+
     generateSession() {
-        //TODO: ask Server for Player and set Player
+        // TODO: ask Server for Player and set Player
+
+        // TODO: Nutze usePlayerStore: wenn er invalid ist, dann frage server nach komplett neuen Player und mache den valid
+        //    wenn er valid ist, dann nutze das valid id und token und frage Server nach der color
+
         this.player.value = { color: Color.White, id: "", token: "" }
 
-        this.fetchBoardState()
+        this.fetchBoardPosition()
         if (this.player.value.color === Color.Black) {
             this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
             return
         }
-        this.pullValidMoves()
+        this.fetchValidMoves()
     }
 
-    fetchBoardState() {
+    fetchBoardPosition() {
         //TODO: ask Server for Board Position
         this.boardPosition.value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
     }
 
-    pullValidMoves() {
+    fetchValidMoves() {
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
         //TODO: get Valid Moves from Server
     }
@@ -80,7 +86,7 @@ export class Session {
     }
 
     receiveMove = () => {
-        this.pullValidMoves()
+        this.fetchValidMoves()
 
         //TODO: Receive Move from Server
     }
