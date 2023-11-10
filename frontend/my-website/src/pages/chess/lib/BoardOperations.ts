@@ -1,5 +1,13 @@
 import { Move } from "pages/chess/lib/constants/ChessConstants";
 
+export function isWhiteSquare(rindex: number, cindex: number) {
+    return (rindex + cindex) % 2 === 0;
+}
+
+function isNumeric(str: string) {
+    return /^\d+$/.test(str);
+}
+
 export function movePiece(move: Move, board: string[][]) {
     let result = new Array<Array<string>>(board.length);
     for (let i: number = 0; i < board.length; i++) {
@@ -23,10 +31,6 @@ export function turnBoard(board: string[][], size: number) {
     return result;
 }
 
-function is_numeric(str: string) {
-    return /^\d+$/.test(str);
-}
-
 export function loadPosition(boardPosition: string, size: number) {
     let result = new Array<Array<string>>(size);
     for (let i: number = 0; i < size; i++) {
@@ -41,7 +45,7 @@ export function loadPosition(boardPosition: string, size: number) {
         if (letter === "/") {
             rownumber += 1;
             colnumber = 0;
-        } else if (is_numeric(letter)) {
+        } else if (isNumeric(letter)) {
             colnumber += parseInt(letter);
         } else {
             result[rownumber][colnumber] = letter;

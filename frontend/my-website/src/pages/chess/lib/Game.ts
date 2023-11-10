@@ -20,7 +20,6 @@ export interface PlayerMetaStore {
     setValid: (valid: boolean) => void;
 }
 
-
 export const usePlayerStore = create<PlayerMetaStore>()(
     persist(
         (set) => ({

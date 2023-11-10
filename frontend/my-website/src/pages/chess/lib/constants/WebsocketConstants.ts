@@ -1,6 +1,7 @@
 import { PieceColor, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
 
-export const chessServerEndpoint = "ws://localhost:8080/chess";
+//export const chessServerEndpoint = "ws://chess.simonkienle.de:8080/api";
+export const chessServerEndpoint = "ws://localhost:8080/api";
 
 export type WebsocketHandler = (message: string) => void;
 

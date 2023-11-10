@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import "pages/chess/style/Board.css";
 import { PieceComponent } from "pages/chess/components/Piece";
 import { Color, PieceColor, PieceType, Piece_dnd_type, Piece, Move, BoardSize, BoardOperations, PositionAbsolute, colToLetter, PositionInfo } from "pages/chess/lib/constants/ChessConstants"
-import { loadPosition, movePiece, turnBoard } from "pages/chess/lib/BoardOperations";
+import { loadPosition, movePiece, turnBoard, isWhiteSquare } from "pages/chess/lib/BoardOperations";
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Signal, signal } from "@preact/signals-react";
@@ -15,8 +15,6 @@ export default function Board(props: {
     boardOperations: BoardOperations, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>
 }) {
     const playerStore = usePlayerStore();
-
-    //TODO: Zielfelder-Highlighting mit einfügen
 
     const boardOrientation = useRef<PieceColor>(Color.White as PieceColor);
 
@@ -79,8 +77,6 @@ function Square(props: {
     rindex: number, cindex: number, makeMove: (move: Move) => void, piece: string,
     boardOrientation: PieceColor, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>
 }) {
-    const hovered_style = { backgroundColor: 'darkgreen', opacity: "0.4", height: "100%", width: "100%" };
-
     const pieceRef = useRef<Piece | undefined>();
 
     const posAbsolut = useMemo<PositionAbsolute>(() => {
@@ -114,12 +110,13 @@ function Square(props: {
         return possibleMoves.includes(posAbsolut)
     }
 
-    const [{ isOver, isOverOriginField }, drop] = useDrop({
+    const [{ isOver, isDropableArea, isOverOriginField }, drop] = useDrop({
         accept: Piece_dnd_type,
         drop: (item, _) => onDrop(item as Piece),
         canDrop: (item, _) => canDrop(item as Piece),
         collect: (monitor) => ({
             isOver: monitor.isOver(),
+            isDropableArea: monitor.canDrop(),
             isOverOriginField: monitor.getItem() === null ? false : (monitor.getItem() as Piece).positionRelative[0] === props.rindex && (monitor.getItem() as Piece).positionRelative[1] === props.cindex
         })
     });
@@ -127,9 +124,14 @@ function Square(props: {
     if (positionInfo[0] === undefined || positionInfo[1] === undefined) {
         pieceRef.current = undefined;
         return (
-            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? Color.White : Color.Black}`}
+            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.White : Color.Black}`}
                 ref={drop}>
-                {(isOver && !isOverOriginField) ? <div style={hovered_style}></div> : <></>}
+                {(isOver && !isOverOriginField) ?
+                    <div className="hoveredStyle">
+                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                    </div> :
+                    <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                }
             </div>
         );
     } else {
@@ -141,15 +143,35 @@ function Square(props: {
         }
         pieceRef.current = newPiece;
         return (
-            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${(props.rindex + props.cindex) % 2 === 0 ? Color.White : Color.Black}`}
+            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.White : Color.Black}`}
                 ref={drop}>
                 {(isOver && !isOverOriginField) ? (
-                    <div style={hovered_style}>
+                    <div className="hoveredStyle">
+                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
                         <PieceComponent piece={pieceRef.current} />
                     </div>
                 ) :
-                    <PieceComponent piece={pieceRef.current} />}
+                    <>
+                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                        <PieceComponent piece={pieceRef.current} />
+                    </>
+                }
             </div>
         );
     }
+}
+
+function DropableMarker(props: { isDropableArea: boolean, isOverOriginField: boolean, containsPiece: boolean, isWhite: boolean }) {
+    return (
+        (props.isDropableArea && !props.isOverOriginField) ? (
+            props.containsPiece ?
+                <>
+                    <div className="dropableMarkerWithPiece">
+                        <span className={`dropableMarkerWithPieceOverlap ${props.isWhite ? Color.White : Color.Black}`}></span>
+                    </div>
+                </> :
+                <div className="dropableMarkerWithoutPiece"></div>
+        ) :
+            <></>
+    );
 }
