@@ -105,9 +105,10 @@ function Square(props: {
     }
 
     const canDrop = (item: Piece) => {
+        return true
         let possibleMoves = props.validMoves.value.get(item.positionAbsolute)
         if (possibleMoves === undefined) return false;
-        return possibleMoves.includes(posAbsolut)
+        //return possibleMoves.includes(posAbsolut)
     }
 
     const [{ isOver, isDropableArea, isOverOriginField }, drop] = useDrop({
@@ -127,10 +128,13 @@ function Square(props: {
             <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.White : Color.Black}`}
                 ref={drop}>
                 {(isOver && !isOverOriginField) ?
-                    <div className="hoveredStyle">
+                    <>
                         <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
-                    </div> :
-                    <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                        <div className="hoveredStyle"></div>
+                    </> :
+                    <>
+                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                    </>
                 }
             </div>
         );
@@ -146,10 +150,11 @@ function Square(props: {
             <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.White : Color.Black}`}
                 ref={drop}>
                 {(isOver && !isOverOriginField) ? (
-                    <div className="hoveredStyle">
+                    <>
                         <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
                         <PieceComponent piece={pieceRef.current} />
-                    </div>
+                        <div className="hoveredStyle"></div>
+                    </>
                 ) :
                     <>
                         <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
@@ -165,11 +170,9 @@ function DropableMarker(props: { isDropableArea: boolean, isOverOriginField: boo
     return (
         (props.isDropableArea && !props.isOverOriginField) ? (
             props.containsPiece ?
-                <>
-                    <div className="dropableMarkerWithPiece">
-                        <span className={`dropableMarkerWithPieceOverlap ${props.isWhite ? Color.White : Color.Black}`}></span>
-                    </div>
-                </> :
+                <div className="dropableMarkerWithPiece">
+                    <span className={`dropableMarkerWithPieceOverlap ${props.isWhite ? Color.White : Color.Black}`}></span>
+                </div> :
                 <div className="dropableMarkerWithoutPiece"></div>
         ) :
             <></>
