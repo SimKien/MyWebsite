@@ -2,8 +2,8 @@ import Board from "pages/chess/components/Board";
 import "pages/chess/style/Chess.css"
 import "pages/chess/lib/websocket/Websocket"
 import { signal } from "@preact/signals-react";
-import { Player, Session } from "pages/chess/lib/Game";
-import { useRef } from "react";
+import { Player, Session, usePlayerStore } from "pages/chess/lib/Game";
+import { useEffect, useRef } from "react";
 import { BoardOperations, Color, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
 
 
@@ -14,6 +14,20 @@ const session = new Session(boardPosition, validMoves, player);
 
 export default function Chess() {
     const boardOperationsRef = useRef<BoardOperations>({ flipBoard: () => { }, makeMove: () => { } });
+
+    const playerStore = usePlayerStore();
+
+    useEffect(() => {
+        if (!playerStore.valid) {
+            session.createPlayer();
+            playerStore.setId(session.player.value.id);
+            playerStore.setToken(session.player.value.token);
+            playerStore.setValid(true);
+        } else {
+            player.value = { color: Color.White, id: playerStore.id, token: playerStore.token };
+        }
+        session.generateSession()
+    }, [])
 
     return (
         <div className="mainbody">

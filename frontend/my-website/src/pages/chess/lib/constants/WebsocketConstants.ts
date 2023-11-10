@@ -1,22 +1,60 @@
-import { PieceColor, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
+import { PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
 
-//export const chessServerEndpoint = "ws://chess.simonkienle.de:8080/api";
-export const chessServerEndpoint = "ws://localhost:8080/api";
-
+//type of a websocket handler
 export type WebsocketHandler = (message: string) => void;
 
-export type MoveInformation = {
-    kind: 'move',
-    from: PositionAbsolute,
-    to: PositionAbsolute
-} | { kid: 'rochade' } | { kind: 'enpassant' } | { kind: 'promotion', pos: PositionAbsolute, piece: string };
-
-export type GameState = {
-    boardString: string,
-    playerInfo: { [K: string]: PieceColor },
-    currentTurn: PieceColor,
+//hints for special moves
+export const MoveHints = {
+    CASTLING_KING_SIDE: "castling-king-side",
+    CASTLING_QUEEN_SIDE: "castling-queen-side",
+    QUEEN_PROMOTION: "queen-promotion",
+    ROOK_PROMOTION: "rook-promotion",
+    BISHOP_PROMOTION: "bishop-promotion",
+    KNIGHT_PROMOTION: "knight-promotion",
+    NONE: "none"
 }
 
-export type InitInformation = {
-    color: PieceColor
+//types of moves
+export const MoveType = {
+    CASTLING: "castling",
+    EN_PASSANT: "en-passant",
+    PROMOTION: "promotion",
+    NORMAL: "normal"
+}
+
+//types of websocket messages
+export const WebsocketTypes = {
+    MOVE: "move"
+}
+
+//send and receive json of move of websocket connection
+export type MoveInformation = {
+    type: string,
+    from: PositionAbsolute,
+    to: PositionAbsolute,
+    moveType: string,
+    moveHint: string
+};
+
+//send and receive json of endpoint /game
+export type GameInformation = {
+    id: string,
+    token: string,
+    color?: string
+}
+
+//receive of endpoint /board-position
+export type BoardPositionInformation = {
+    boardPosition: string
+}
+
+//receive of endpoint /valid-moves
+export type ValidMovesInformation = {
+    validMoves: Map<PositionAbsolute, PositionAbsolute[]>
+}
+
+//receive of endpoint /player
+export type PlayerInformation = {
+    id: string,
+    token: string
 }

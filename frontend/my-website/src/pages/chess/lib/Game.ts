@@ -1,9 +1,10 @@
 import { PieceColor, Color, Move, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
 import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
-import { MoveInformation, chessServerEndpoint } from "pages/chess/lib/constants/WebsocketConstants";
+import { MoveHints, MoveInformation, MoveType, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { BASE_URLS, ENDPOINTS } from "pages/chess/lib/websocket/api";
 
 export interface Player {
     color: PieceColor;
@@ -42,51 +43,50 @@ export class Session {
 
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
         player: Signal<Player>) {
-        this.connection = new WebsocketCLient(chessServerEndpoint)
+        this.connection = new WebsocketCLient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
         this.connection.addHandler(console.log)
         this.player = player;
         this.validMoves = validMoves
         this.boardPosition = boardPosition
-        this.generateSession()
     }
 
-    // Adde einen Handler für die verschiedenen Arten von Nachrichten: Move, newPlayer, newBoardPosition, newValidMoves
-
     generateSession() {
-        // TODO: ask Server for Player and set Player
-
-        // TODO: Nutze usePlayerStore: wenn er invalid ist, dann frage server nach komplett neuen Player und mache den valid
-        //    wenn er valid ist, dann nutze das valid id und token und frage Server nach der color
-
-        this.player.value = { color: Color.White, id: "", token: "" }
+        //mit /game und http einem neuen Game beitreten und color des Spielers setzen
 
         this.fetchBoardPosition()
-        if (this.player.value.color === Color.Black) {
-            this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
-            return
-        }
         this.fetchValidMoves()
     }
 
+    createPlayer() {
+        //mit /player und http einen neuen Player erstellen, nur id und token
+        this.player.value = { color: Color.White, id: "1234", token: "1234" }
+    }
+
     fetchBoardPosition() {
-        //TODO: ask Server for Board Position
+        //mit /board-position und http die aktuelle Board Position abfragen
         this.boardPosition.value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
     }
 
     fetchValidMoves() {
+        //mit /valid-moves und http die valid moves abfragen
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
-        //TODO: get Valid Moves from Server
     }
 
     reportMove = (move: Move) => {
-        let moveInfo: MoveInformation = { kind: 'move', from: move.fromAbsolute, to: move.toAbsolute }
+        this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
+        let moveInfo: MoveInformation = {
+            type: WebsocketTypes.MOVE,
+            from: move.fromAbsolute,
+            to: move.toAbsolute,
+            moveType: MoveType.NORMAL,                  //TODO: possibly other move types
+            moveHint: MoveHints.NONE
+        }
         //this.connection.send(JSON.stringify(moveInfo))
-        this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
     }
 
     receiveMove = () => {
         this.fetchValidMoves()
 
-        //TODO: Receive Move from Server
+        //TODO: Receive Move and valid moves from Server
     }
 }

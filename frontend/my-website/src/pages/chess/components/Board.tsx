@@ -6,7 +6,7 @@ import { loadPosition, movePiece, turnBoard, isWhiteSquare } from "pages/chess/l
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Signal, signal } from "@preact/signals-react";
-import { Player, usePlayerStore } from "pages/chess/lib/Game";
+import { Player } from "pages/chess/lib/Game";
 
 const board = signal<string[][]>((new Array(BoardSize).fill(new Array(BoardSize).fill(""))));
 
@@ -14,8 +14,6 @@ export default function Board(props: {
     boardPosition: Signal<string>, reportMove: (move: Move) => void, player: Signal<Player>,
     boardOperations: BoardOperations, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>
 }) {
-    const playerStore = usePlayerStore();
-
     const boardOrientation = useRef<PieceColor>(Color.White as PieceColor);
 
     useEffect(() => {
@@ -39,8 +37,6 @@ export default function Board(props: {
             board.value = turnBoard(board.value, BoardSize)
             boardOrientation.current = Color.White;
         }
-        playerStore.setId(props.player.value.id);
-        playerStore.setToken(props.player.value.token);
     }, [props.player.value]);
 
     const flipBoard = () => {
@@ -105,10 +101,9 @@ function Square(props: {
     }
 
     const canDrop = (item: Piece) => {
-        return true
         let possibleMoves = props.validMoves.value.get(item.positionAbsolute)
         if (possibleMoves === undefined) return false;
-        //return possibleMoves.includes(posAbsolut)
+        return possibleMoves.includes(posAbsolut)
     }
 
     const [{ isOver, isDropableArea, isOverOriginField }, drop] = useDrop({
