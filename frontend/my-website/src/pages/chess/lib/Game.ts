@@ -1,10 +1,10 @@
 import { PieceColor, Color, Move, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
 import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
-import { MoveHints, MoveInformation, MoveType, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
+import { MoveHints, MoveInformation, MoveType, PlayerInformation, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BASE_URLS, ENDPOINTS } from "pages/chess/lib/websocket/api";
+import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getNewPlayer, getValidMoves } from "pages/chess/lib/websocket/api";
 
 export interface Player {
     color: PieceColor;
@@ -44,32 +44,41 @@ export class Session {
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
         player: Signal<Player>) {
         this.connection = new WebsocketCLient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
-        this.connection.addHandler(console.log)
+        this.connection.addHandler(console.log)                                             //TODO: Am Ende entfernen
         this.player = player;
         this.validMoves = validMoves
         this.boardPosition = boardPosition
     }
 
-    generateSession() {
-        //mit /game und http einem neuen Game beitreten und color des Spielers setzen
+    async generateSession() {
+        let playerInformation: PlayerInformation = {
+            id: this.player.value.id,
+            token: this.player.value.token
+        }
+        await getGame(playerInformation).then((res) => this.player.value.color = res.color as PieceColor)
 
-        this.fetchBoardPosition()
-        this.fetchValidMoves()
+        await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
     }
 
-    createPlayer() {
-        //mit /player und http einen neuen Player erstellen, nur id und token
-        this.player.value = { color: Color.White, id: "1234", token: "1234" }
+    async createPlayer() {
+        let playerInfo = await getNewPlayer();
+        this.player.value = { color: Color.White, id: playerInfo.id, token: playerInfo.token }
     }
 
-    fetchBoardPosition() {
-        //mit /board-position und http die aktuelle Board Position abfragen
-        this.boardPosition.value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+    async fetchBoardPosition() {
+        let playerInformation: PlayerInformation = {
+            id: this.player.value.id,
+            token: this.player.value.token
+        }
+        await getBoardPosition(playerInformation).then((res) => this.boardPosition.value = res.boardPosition)
     }
 
-    fetchValidMoves() {
-        //mit /valid-moves und http die valid moves abfragen
-        this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()
+    async fetchValidMoves() {
+        let playerInformation: PlayerInformation = {
+            id: this.player.value.id,
+            token: this.player.value.token
+        }
+        await getValidMoves(playerInformation).then((data) => this.validMoves.value = data.validMoves)
     }
 
     reportMove = (move: Move) => {
@@ -79,9 +88,9 @@ export class Session {
             from: move.fromAbsolute,
             to: move.toAbsolute,
             moveType: MoveType.NORMAL,                  //TODO: possibly other move types
-            moveHint: MoveHints.NONE
+            moveHint: MoveHints.NONE                    //TODO: possibly other move hints
         }
-        //this.connection.send(JSON.stringify(moveInfo))
+        this.connection.send(JSON.stringify(moveInfo))
     }
 
     receiveMove = () => {

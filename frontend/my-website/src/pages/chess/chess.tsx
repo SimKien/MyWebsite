@@ -17,16 +17,20 @@ export default function Chess() {
 
     const playerStore = usePlayerStore();
 
-    useEffect(() => {
+    const loadGame = async () => {
         if (!playerStore.valid) {
-            session.createPlayer();
+            await session.createPlayer();
             playerStore.setId(session.player.value.id);
             playerStore.setToken(session.player.value.token);
             playerStore.setValid(true);
         } else {
             player.value = { color: Color.White, id: playerStore.id, token: playerStore.token };
         }
-        session.generateSession()
+        await session.generateSession()
+    }
+
+    useEffect(() => {
+        void loadGame();
     }, [])
 
     return (

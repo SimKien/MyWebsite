@@ -36,11 +36,11 @@ export type MoveInformation = {
     moveHint: string
 };
 
-//send and receive json of endpoint /game
-export type GameInformation = {
+//receive json of endpoint /game
+export type PlayerGameInformation = {
     id: string,
     token: string,
-    color?: string
+    color: string
 }
 
 //receive of endpoint /board-position
@@ -53,7 +53,7 @@ export type ValidMovesInformation = {
     validMoves: Map<PositionAbsolute, PositionAbsolute[]>
 }
 
-//receive of endpoint /player
+//receive of endpoint /player ans send of endpoint /game and /board-position
 export type PlayerInformation = {
     id: string,
     token: string
