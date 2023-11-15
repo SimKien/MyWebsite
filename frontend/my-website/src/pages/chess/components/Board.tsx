@@ -12,7 +12,7 @@ import { MoveTypes } from "pages/chess/lib/constants/WebsocketConstants";
 const board = signal<string[][]>((new Array(BoardSize).fill(new Array(BoardSize).fill(""))));
 
 export default function Board(props: {
-    boardPosition: Signal<string>, reportMove: (move: Move) => void, player: Signal<Player>,
+    boardPosition: Signal<string>, reportMove: (move: Move, specialMove: SpecialMove | undefined) => void, player: Signal<Player>,
     boardOperations: BoardOperations, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
     specialMoves: Signal<SpecialMove[]>
 }) {
@@ -48,7 +48,7 @@ export default function Board(props: {
 
     const makeClientMove = (move: Move, specialMove: SpecialMove | undefined) => {
         board.value = movePiece(move, board.value, specialMove);
-        props.reportMove(move);
+        props.reportMove(move, specialMove);
     }
 
     const makeServerMove = (move: Move, specialMove: SpecialMove | undefined) => {
