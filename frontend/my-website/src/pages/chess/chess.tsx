@@ -4,13 +4,14 @@ import "pages/chess/lib/websocket/Websocket"
 import { signal } from "@preact/signals-react";
 import { Player, Session, usePlayerStore } from "pages/chess/lib/Game";
 import { useEffect, useRef } from "react";
-import { BoardOperations, Color, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
+import { BoardOperations, Color, PositionAbsolute, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
 
 
 const boardPosition = signal<string>("");
 const validMoves = signal<Map<PositionAbsolute, PositionAbsolute[]>>(new Map<PositionAbsolute, PositionAbsolute[]>());
-const player = signal<Player>({ color: Color.White, id: "", token: "" });
-const session = new Session(boardPosition, validMoves, player);
+const player = signal<Player>({ color: Color.WHITE, id: "", token: "" });
+const specialMoves = signal<SpecialMove[]>(new Array<SpecialMove>());
+const session = new Session(boardPosition, validMoves, player, specialMoves);
 
 export default function Chess() {
     const boardOperationsRef = useRef<BoardOperations>({ flipBoard: () => { }, makeMove: () => { } });
@@ -24,7 +25,7 @@ export default function Chess() {
             playerStore.setToken(session.player.value.token);
             playerStore.setValid(true);
         } else {
-            player.value = { color: Color.White, id: playerStore.id, token: playerStore.token };
+            player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token };
         }
         await session.generateSession()
     }
@@ -36,7 +37,7 @@ export default function Chess() {
     return (
         <div className="mainbody">
             <Board boardPosition={boardPosition} reportMove={session.reportMove}
-                player={player} boardOperations={boardOperationsRef.current} validMoves={validMoves} />
+                player={player} boardOperations={boardOperationsRef.current} validMoves={validMoves} specialMoves={specialMoves} />
             <button onClick={boardOperationsRef.current.flipBoard}>Flip Board</button>
         </div>
     );

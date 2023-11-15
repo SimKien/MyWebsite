@@ -1,4 +1,5 @@
-import { Move } from "pages/chess/lib/constants/ChessConstants";
+import { Move, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
+import { MoveTypes } from "pages/chess/lib/constants/WebsocketConstants";
 
 export function isWhiteSquare(rindex: number, cindex: number) {
     return (rindex + cindex) % 2 === 0;
@@ -8,15 +9,29 @@ function isNumeric(str: string) {
     return /^\d+$/.test(str);
 }
 
-export function movePiece(move: Move, board: string[][]) {
+export function movePiece(move: Move, board: string[][], specialMove: SpecialMove | undefined) {
     let result = new Array<Array<string>>(board.length);
     for (let i: number = 0; i < board.length; i++) {
         result[i] = board[i];
     }
-    console.log(move.fromAbsolute + " " + move.toAbsolute)
-    let temp = result[move.fromRelative[0]][move.fromRelative[1]];
+    const temp = result[move.fromRelative[0]][move.fromRelative[1]];
     result[move.fromRelative[0]][move.fromRelative[1]] = "";
     result[move.toRelative[0]][move.toRelative[1]] = temp;
+    if (specialMove) {
+        if (specialMove.type === MoveTypes.CASTLING) {
+            const rookTargetCol = (move.toRelative[1] + move.fromRelative[1]) / 2;
+            const rookSourceCol = move.toRelative[1] > move.fromRelative[1] ? 7 : 0;
+            result[move.toRelative[0]][rookTargetCol] = result[move.toRelative[0]][rookSourceCol];
+            result[move.fromRelative[0]][rookSourceCol] = "";
+        } else if (specialMove.type === MoveTypes.EN_PASSANT) {
+            const enPassantTargetRow = move.fromRelative[0]
+            result[enPassantTargetRow][move.toRelative[1]] = "";
+        } else if (specialMove.type === MoveTypes.PROMOTION) {
+            if (move.promotionPiece === undefined) return result;
+            let promotionPiece = move.promotionPiece
+            result[move.toRelative[0]][move.toRelative[1]] = promotionPiece;
+        }
+    }
     return result;
 }
 

@@ -9,7 +9,7 @@ export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 //public operations on the board-component
 export interface BoardOperations {
     flipBoard: () => void;
-    makeMove: (move: Move) => void
+    makeMove: (move: Move, specialMove: SpecialMove) => void
 }
 
 export interface Piece {
@@ -24,8 +24,14 @@ export interface Move {
     toRelative: PositionRelative;
     fromAbsolute: PositionAbsolute;
     toAbsolute: PositionAbsolute;
-    movedPiece: Piece
+    promotionPiece?: PieceType;
 };
+
+export type SpecialMove = {
+    fromAbsolute: PositionAbsolute,
+    toAbsolute: PositionAbsolute,
+    type: string
+}
 
 export const Piece_names = {
     King: "K",
@@ -34,6 +40,13 @@ export const Piece_names = {
     Bishop: "B",
     Knight: "N",
     Pawn: "P"
+}
+
+export const Piece_promotions = {
+    Queen: "Q",
+    Rook: "R",
+    Bishop: "B",
+    Knight: "N"
 }
 
 export const colToLetter = new Map<number, string>([
@@ -47,9 +60,9 @@ export const colToLetter = new Map<number, string>([
     [7, "h"]
 ]);
 
-export const Color: { White: PieceColor, Black: PieceColor } = {
-    White: "white",
-    Black: "black"
+export const Color: { WHITE: PieceColor, BLACK: PieceColor } = {
+    WHITE: "white",
+    BLACK: "black"
 }
 
 export const draggingOpacity: string = "0.4";

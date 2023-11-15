@@ -1,21 +1,10 @@
-import { PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
+import { PieceColor, PositionAbsolute, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
 
 //type of a websocket handler
 export type WebsocketHandler = (message: string) => void;
 
-//hints for special moves
-export const MoveHints = {
-    CASTLING_KING_SIDE: "castling-king-side",
-    CASTLING_QUEEN_SIDE: "castling-queen-side",
-    QUEEN_PROMOTION: "queen-promotion",
-    ROOK_PROMOTION: "rook-promotion",
-    BISHOP_PROMOTION: "bishop-promotion",
-    KNIGHT_PROMOTION: "knight-promotion",
-    NONE: "none"
-}
-
 //types of moves
-export const MoveType = {
+export const MoveTypes = {
     CASTLING: "castling",
     EN_PASSANT: "en-passant",
     PROMOTION: "promotion",
@@ -29,18 +18,18 @@ export const WebsocketTypes = {
 
 //send and receive json of move of websocket connection
 export type MoveInformation = {
-    type: string,
+    messageType: string,
     from: PositionAbsolute,
     to: PositionAbsolute,
     moveType: string,
-    moveHint: string
+    promotionPiece?: string
 };
 
 //receive json of endpoint /game
 export type PlayerGameInformation = {
     id: string,
     token: string,
-    color: string
+    color: PieceColor
 }
 
 //receive of endpoint /board-position
@@ -51,6 +40,7 @@ export type BoardPositionInformation = {
 //receive of endpoint /valid-moves
 export type ValidMovesInformation = {
     validMoves: Map<PositionAbsolute, PositionAbsolute[]>
+    specialMoves: SpecialMove[]
 }
 
 //receive of endpoint /player ans send of endpoint /game and /board-position

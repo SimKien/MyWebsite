@@ -1,6 +1,6 @@
-import { PieceColor, Color, Move, PositionAbsolute } from "pages/chess/lib/constants/ChessConstants";
+import { PieceColor, Color, Move, PositionAbsolute, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
 import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
-import { MoveHints, MoveInformation, MoveType, PlayerInformation, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
+import { MoveInformation, MoveTypes, PlayerInformation, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -40,14 +40,16 @@ export class Session {
     connection: WebsocketCLient;
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
     boardPosition: Signal<string>;
+    specialMoves: Signal<SpecialMove[]>;
 
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
-        player: Signal<Player>) {
+        player: Signal<Player>, specialMoves: Signal<SpecialMove[]>) {
         this.connection = new WebsocketCLient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
         this.connection.addHandler(console.log)                                             //TODO: Am Ende entfernen
         this.player = player;
         this.validMoves = validMoves
         this.boardPosition = boardPosition
+        this.specialMoves = specialMoves
     }
 
     async generateSession() {
@@ -62,7 +64,7 @@ export class Session {
 
     async createPlayer() {
         let playerInfo = await getNewPlayer();
-        this.player.value = { color: Color.White, id: playerInfo.id, token: playerInfo.token }
+        this.player.value = { color: Color.WHITE, id: playerInfo.id, token: playerInfo.token }
     }
 
     async fetchBoardPosition() {
@@ -78,23 +80,31 @@ export class Session {
             id: this.player.value.id,
             token: this.player.value.token
         }
-        await getValidMoves(playerInformation).then((data) => this.validMoves.value = data.validMoves)
+        await getValidMoves(playerInformation).then((data) => {
+            this.validMoves.value = data.validMoves
+            this.specialMoves.value = data.specialMoves
+        })
     }
 
-    reportMove = (move: Move) => {
+    reportMove = (move: Move, specialMove: SpecialMove | undefined) => {
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
         let moveInfo: MoveInformation = {
-            type: WebsocketTypes.MOVE,
+            messageType: WebsocketTypes.MOVE,
             from: move.fromAbsolute,
             to: move.toAbsolute,
-            moveType: MoveType.NORMAL,                  //TODO: possibly other move types
-            moveHint: MoveHints.NONE                    //TODO: possibly other move hints
+            moveType: MoveTypes.NORMAL
+        }
+        if (specialMove) {
+            moveInfo.moveType = specialMove.type
+            if (specialMove.type === MoveTypes.PROMOTION) {
+                moveInfo.promotionPiece = move.promotionPiece
+            }
         }
         this.connection.send(JSON.stringify(moveInfo))
     }
 
     receiveMove = () => {
-        this.fetchValidMoves()
+        this.fetchValidMoves()      //wichtig: zuerst specialMoves setzen, damit makeMove sie berücksichtigen kann beim Setzen des Boards
 
         //TODO: Receive Move and valid moves from Server
     }
