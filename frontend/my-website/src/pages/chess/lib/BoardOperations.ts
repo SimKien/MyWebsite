@@ -1,4 +1,4 @@
-import { Move, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
+import { Color, Move, PieceColor, PositionAbsolute, PositionRelative, SpecialMove, colToLetter, letterToCol } from "pages/chess/lib/constants/ChessConstants";
 import { MoveTypes } from "pages/chess/lib/constants/WebsocketConstants";
 
 export function isWhiteSquare(rindex: number, cindex: number) {
@@ -7,6 +7,23 @@ export function isWhiteSquare(rindex: number, cindex: number) {
 
 function isNumeric(str: string) {
     return /^\d+$/.test(str);
+}
+
+export function getRelativePosition(position: PositionAbsolute, size: number, boardOrientation: PieceColor): PositionRelative {
+    let positionSplit = position.split("");
+    if (boardOrientation === Color.WHITE) {
+        return [size - parseInt(positionSplit[1]), letterToCol.get(positionSplit[0]) ?? 0];
+    } else {
+        return [parseInt(positionSplit[1]) - 1, size - (letterToCol.get(positionSplit[0]) ?? 0) - 1];
+    }
+}
+
+export function getAbsolutePosition(position: PositionRelative, size: number, boardOrientation: PieceColor): PositionAbsolute {
+    if (boardOrientation === Color.WHITE) {
+        return ((colToLetter.get(position[1]) ?? "a") + (size - position[0]).toString());
+    } else {
+        return ((colToLetter.get(size - position[1] - 1) ?? "a") + (position[0] + 1).toString());
+    }
 }
 
 export function movePiece(move: Move, board: string[][], specialMove: SpecialMove | undefined) {

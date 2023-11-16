@@ -9,7 +9,7 @@ export type PositionInfo = [PieceType | undefined, PieceColor | undefined];
 //public operations on the board-component
 export interface BoardOperations {
     flipBoard: () => void;
-    makeMove: (move: Move, specialMove: SpecialMove) => void
+    makeMove: (move: Move, specialMove: SpecialMove | undefined) => void
 }
 
 export interface Piece {
@@ -42,13 +42,6 @@ export const Piece_names = {
     Pawn: "P"
 }
 
-export const Piece_promotions = {
-    Queen: "Q",
-    Rook: "R",
-    Bishop: "B",
-    Knight: "N"
-}
-
 export const colToLetter = new Map<number, string>([
     [0, "a"],
     [1, "b"],
@@ -59,6 +52,17 @@ export const colToLetter = new Map<number, string>([
     [6, "g"],
     [7, "h"]
 ]);
+
+export const letterToCol = new Map<string, number>([
+    ["a", 0],
+    ["b", 1],
+    ["c", 2],
+    ["d", 3],
+    ["e", 4],
+    ["f", 5],
+    ["g", 6],
+    ["h", 7]
+])
 
 export const Color: { WHITE: PieceColor, BLACK: PieceColor } = {
     WHITE: "white",

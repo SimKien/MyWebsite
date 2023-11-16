@@ -34,6 +34,10 @@ export default function Chess() {
         void loadGame();
     }, [])
 
+    useEffect(() => {
+        session.makeMove = boardOperationsRef.current.makeMove;
+    }, [boardOperationsRef.current.makeMove])
+
     return (
         <div className="mainbody">
             <Board boardPosition={boardPosition} reportMove={session.reportMove}
