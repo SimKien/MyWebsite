@@ -1,6 +1,5 @@
 import Board from "pages/chess/components/Board";
 import "pages/chess/style/Chess.css"
-import "pages/chess/lib/websocket/Websocket"
 import { signal } from "@preact/signals-react";
 import { Player, Session, usePlayerStore } from "pages/chess/lib/Game";
 import { useEffect, useRef } from "react";
@@ -26,6 +25,7 @@ export default function Chess() {
             playerStore.setValid(true);
         } else {
             player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token };
+            session.player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token }
         }
         await session.generateSession()
     }

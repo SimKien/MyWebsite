@@ -1,11 +1,11 @@
 import { PieceColor, Color, Move, PositionAbsolute, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
-import { WebsocketCLient } from "pages/chess/lib/websocket/Websocket";
+import { WebsocketCLient } from "pages/chess/lib/communication/Websocket";
 import { MoveInformation, PlayerInformation, WebsocketTypes } from "pages/chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getNewPlayer, getValidMoves } from "pages/chess/lib/websocket/api";
-import { convertToMoveInformation, convertToMoves } from "pages/chess/lib/websocket/WSDataParser";
+import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getNewPlayer, getValidMoves } from "pages/chess/lib/communication/api";
+import { convertToMoveInformation, convertToMoves } from "pages/chess/lib/communication/WSDataParser";
 
 const PLAYER_STORE_KEY = "player";
 
