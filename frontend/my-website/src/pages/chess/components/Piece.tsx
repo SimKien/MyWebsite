@@ -14,7 +14,7 @@ import "pages/chess/style/Piece.css"
 import { useDrag } from "react-dnd";
 import { Color, Piece_dnd_type, PieceColor, PieceMap, Piece, draggingOpacity, nonDraggingOpacity } from "pages/chess/lib/constants/ChessConstants";
 
-const PIECE_MAP: PieceMap = {
+export const PIECE_MAP: PieceMap = {
     "K": (color: PieceColor, opacity: string) => color === Color.WHITE ? <img className="piecesvg" style={{ opacity: opacity }} src={KingWhiteSVG} alt="King White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={KingBlackSVG} alt="King Black"></img>,
     "Q": (color: PieceColor, opacity: string) => color === Color.WHITE ? <img className="piecesvg" style={{ opacity: opacity }} src={QueenWhiteSVG} alt="Queen White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={QueenBlackSVG} alt="Queen Black"></img>,
     "R": (color: PieceColor, opacity: string) => color === Color.WHITE ? <img className="piecesvg" style={{ opacity: opacity }} src={RookWhiteSVG} alt="Rook White"></img> : <img className="piecesvg" style={{ opacity: opacity }} src={RookBlackSVG} alt="Rook Black"></img>,

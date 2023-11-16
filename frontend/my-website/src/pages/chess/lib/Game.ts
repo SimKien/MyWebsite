@@ -49,7 +49,7 @@ export class Session {
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
         player: Signal<Player>, specialMoves: Signal<SpecialMove[]>) {
         this.connection = new WebsocketCLient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
-        this.connection.addHandler(console.log)                                             //TODO: Am Ende entfernen
+        this.connection.addHandler(console.log)                                             //TODO: Evtl am Ende entfernen
         this.connection.addHandler(this.receiveMove)
         this.player = player;
         this.validMoves = validMoves

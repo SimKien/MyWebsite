@@ -45,7 +45,7 @@ export function movePiece(move: Move, board: string[][], specialMove: SpecialMov
             result[enPassantTargetRow][move.toRelative[1]] = "";
         } else if (specialMove.type === MoveTypes.PROMOTION) {
             if (move.promotionPiece === undefined) return result;
-            let promotionPiece = move.promotionPiece
+            let promotionPiece = result[move.toRelative[0]][move.toRelative[1]] === result[move.toRelative[0]][move.toRelative[1]].toUpperCase() ? move.promotionPiece.toUpperCase() : move.promotionPiece.toLowerCase();
             result[move.toRelative[0]][move.toRelative[1]] = promotionPiece;
         }
     }

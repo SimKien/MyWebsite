@@ -1,18 +1,21 @@
 import { Signal } from "@preact/signals-react";
 import { Color, Move, Piece, PieceColor, PieceType, Piece_dnd_type, PositionAbsolute, PositionInfo, PositionRelative, SpecialMove } from "pages/chess/lib/constants/ChessConstants";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getAbsolutePosition, isWhiteSquare } from "pages/chess/lib/BoardOperations";
 import { MoveTypes } from "pages/chess/lib/constants/WebsocketConstants";
 import { useDrop } from "react-dnd";
 import { PieceComponent } from "pages/chess/components/Piece";
 import "pages/chess/style/Square.css";
+import PromotionSelection from "pages/chess/components/PromotionSelection";
 
 export default function Square(props: {
     rindex: number, cindex: number, makeMove: (move: Move, specialMove: SpecialMove | undefined) => void, piece: string,
     boardOrientation: PieceColor, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>, specialMoves: SpecialMove[],
     size: number
 }) {
-    const pieceRef = useRef<Piece | undefined>();
+    const [promotionDialog, setPromotionDialog] = useState<[boolean, PieceColor]>([false, Color.WHITE]);
+
+    const pieceRef = useRef<Piece | undefined>(undefined);
 
     const posRelative = useMemo<PositionRelative>(() => {
         return [props.rindex, props.cindex]
@@ -28,6 +31,8 @@ export default function Square(props: {
         return [pieceType, pieceColor]
     }, [props.piece])
 
+    const moveStore = useRef<[Move, SpecialMove | undefined] | undefined>(undefined);
+
     const onDrop = (item: Piece) => {
         let move: Move = {
             fromRelative: item.positionRelative,
@@ -35,13 +40,24 @@ export default function Square(props: {
             fromAbsolute: item.positionAbsolute,
             toAbsolute: posAbsolut
         }
+        if (item.positionAbsolute === posAbsolut) return;
         let specialMove = props.specialMoves.find((specialMove) => {
             return specialMove.fromAbsolute === item.positionAbsolute && specialMove.toAbsolute === posAbsolut
         });
         if (specialMove !== undefined && specialMove.type === MoveTypes.PROMOTION) {
-            move.promotionPiece = "Q"               //TODO: add promotion piece selection and set it
+            moveStore.current = [move, specialMove];
+            setPromotionDialog([true, item.color]);
+            return;
         }
         props.makeMove(move, specialMove);
+    }
+
+    const selectPromotion = (piece: PieceType) => {
+        if (moveStore.current === undefined) return;
+        if (promotionDialog[0] === false) return;
+        setPromotionDialog([false, promotionDialog[1]]);
+        moveStore.current[0].promotionPiece = piece;
+        props.makeMove(moveStore.current[0], moveStore.current[1]);
     }
 
     const canDrop = (item: Piece) => {
@@ -61,23 +77,8 @@ export default function Square(props: {
         })
     });
 
-    if (positionInfo[0] === undefined || positionInfo[1] === undefined) {
-        pieceRef.current = undefined;
-        return (
-            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.WHITE : Color.BLACK}`}
-                ref={drop}>
-                {(isOver && !isOverOriginField) ?
-                    <>
-                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
-                        <div className="hoveredStyle"></div>
-                    </> :
-                    <>
-                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={false} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
-                    </>
-                }
-            </div>
-        );
-    } else {
+    pieceRef.current = undefined
+    if (positionInfo[0] !== undefined && positionInfo[1] !== undefined) {
         let newPiece: Piece = {
             positionRelative: posRelative,
             positionAbsolute: posAbsolut,
@@ -85,24 +86,26 @@ export default function Square(props: {
             color: positionInfo[1]
         }
         pieceRef.current = newPiece;
-        return (
-            <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.WHITE : Color.BLACK}`}
-                ref={drop}>
-                {(isOver && !isOverOriginField) ? (
-                    <>
-                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
-                        <PieceComponent piece={pieceRef.current} />
-                        <div className="hoveredStyle"></div>
-                    </>
-                ) :
-                    <>
-                        <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={true} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
-                        <PieceComponent piece={pieceRef.current} />
-                    </>
-                }
-            </div>
-        );
     }
+
+    return (
+        <div id={`r${props.rindex}c${props.cindex}`} className={`square ${isWhiteSquare(props.rindex, props.cindex) ? Color.WHITE : Color.BLACK}`}
+            ref={drop}>
+            {promotionDialog[0] ? (
+                <PromotionSelection color={promotionDialog[1]} reportSelection={selectPromotion} />
+            ) :
+                <>
+                    <DropableMarker isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} containsPiece={pieceRef.current !== undefined} isWhite={isWhiteSquare(props.rindex, props.cindex)} />
+                    {pieceRef.current !== undefined &&
+                        <PieceComponent piece={pieceRef.current} />
+                    }
+                    {(isOver && !isOverOriginField) ? (
+                        <div className="hoveredStyle"></div>
+                    ) : <></>}
+                </>
+            }
+        </div>
+    );
 }
 
 function DropableMarker(props: { isDropableArea: boolean, isOverOriginField: boolean, containsPiece: boolean, isWhite: boolean }) {
