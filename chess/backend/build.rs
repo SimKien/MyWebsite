@@ -1,18 +1,28 @@
-use std::env;
 use std::process::Command;
+use std::{env, fs};
 
 //Build frontend if changed
 
 fn main() {
     let cmd = if cfg!(windows) { "npm.cmd" } else { "npm" };
 
+    //Set Specta TYPES used to generate typescript types
     {
         let types = comlib::TYPES.lock().unwrap().clone();
         let mut lock = specta::export::TYPES.lock().unwrap();
 
         *lock = types;
     }
-    specta::export::ts("../frontend/src/chess/lib/constants/CommunicationConstants.ts").unwrap();
+    const BINDINGS: &str = "../frontend/src/chess/lib/constants/CommunicationConstants.ts";
+    const TEMP_BINDINGS: &str = "../target/bindings.ts.tmp";
+    specta::export::ts(TEMP_BINDINGS).unwrap();
+    let old = fs::read_to_string(BINDINGS).unwrap_or_default();
+    let new = fs::read_to_string(TEMP_BINDINGS).unwrap();
+    // Only update bindings if they changed to avoid triggering a recompile of the frontend
+    if old != new {
+        println!("cargo:warning=Updating bindings");
+        fs::write(BINDINGS, new).unwrap();
+    }
 
     // Get the project directory
     let project_dir = env::current_dir().unwrap();
@@ -20,13 +30,7 @@ fn main() {
     // Build the path to the `liberica` directory
     let frontend_dir = project_dir.parent().unwrap().join("frontend");
 
-    for path in [
-        "package.json",
-        "src",
-        "tsconfig.json",
-        "index.html",
-        "../comlib",
-    ] {
+    for path in ["package.json", "src", "tsconfig.json", "index.html"] {
         println!(
             "cargo:rerun-if-changed={}/{}",
             frontend_dir.to_string_lossy(),

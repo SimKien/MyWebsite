@@ -8,6 +8,7 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use specta::{ExportError, Type, TypeDefs};
 
+//Get reference to TYPES of specta which is used to generate typescript types
 pub static TYPES: &Lazy<Mutex<(TypeDefs, BTreeSet<ExportError>)>> = &specta::export::TYPES;
 
 #[derive(Type, Serialize, Deserialize, Debug)]
