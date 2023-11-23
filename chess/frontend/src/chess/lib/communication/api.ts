@@ -10,8 +10,8 @@ export const BASE_URLS = import.meta.env.DEV
         FETCH: `http://${HOSTNAME_DEV}/api`,
     }
     : {
-        WEBSOCKET: `wss://${HOSTNAME_PROD}`,
-        FETCH: `https://${HOSTNAME_PROD}/api`,
+        WEBSOCKET: `ws://${HOSTNAME_PROD}`,                     //TODO: Ändern
+        FETCH: `http://${HOSTNAME_PROD}/api`,                   //TODO: Ändern
     };
 
 export const ENDPOINTS = {
@@ -26,8 +26,8 @@ export const AXIOS = axios.create({ baseURL: BASE_URLS.FETCH })
 
 export const getNewPlayer = (): Promise<PlayerInformation> => AXIOS.get(ENDPOINTS.GET_PLAYER).then((res) => res.data)
 
-export const getGame = (playerInformation: PlayerInformation): Promise<PlayerGameInformation> => AXIOS.post(ENDPOINTS.GET_BOARD_POSITION + `?id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getGame = (playerInformation: PlayerInformation): Promise<PlayerGameInformation> => AXIOS.get(ENDPOINTS.GET_GAME + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
 
-export const getBoardPosition = (playerInformation: PlayerInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getBoardPosition = (playerInformation: PlayerInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
 
-export const getValidMoves = (playerInformation: PlayerInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getValidMoves = (playerInformation: PlayerInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)

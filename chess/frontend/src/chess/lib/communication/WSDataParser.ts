@@ -1,28 +1,27 @@
-import { MoveInformation, MoveTypes, WebsocketTypes } from "chess/lib/constants/WebsocketConstants"
+import { WebsocketMessage, MoveTypes, WebsocketTypes } from "chess/lib/constants/WebsocketConstants"
 import { Move, PieceType, SpecialMove } from "chess/lib/constants/ChessConstants"
 
 export const convertToMoveInformation = (move: Move, specialMove: SpecialMove | undefined) => {
-    let moveInfo: MoveInformation = {
+    let moveInfo: WebsocketMessage = {
         messageType: WebsocketTypes.MOVE,
         from: move.fromAbsolute,
         to: move.toAbsolute,
-        moveType: MoveTypes.NORMAL
+        moveType: MoveTypes.NORMAL,
+        promotionPiece: move.promotionPiece
     }
     if (specialMove) {
-        moveInfo.moveType = specialMove.type
-        if (specialMove.type === MoveTypes.PROMOTION) {
-            moveInfo.promotionPiece = move.promotionPiece
-        }
+        moveInfo.moveType = specialMove.specialType
     }
     return moveInfo
 }
 
-export const convertToMoves = (moveInformation: MoveInformation) => {
+export const convertToMoves = (moveInformation: WebsocketMessage) => {
     let move: Move = {
         fromAbsolute: moveInformation.from,
         toAbsolute: moveInformation.to,
-        fromRelative: [-1, -1],                 //set coordinates to undefined
-        toRelative: [-1, -1]
+        fromRelative: [-1, -1],                                     //set coordinates to undefined
+        toRelative: [-1, -1],
+        promotionPiece: moveInformation.promotionPiece as PieceType
     }
 
     let specialMove: SpecialMove | undefined = undefined
@@ -30,10 +29,7 @@ export const convertToMoves = (moveInformation: MoveInformation) => {
         specialMove = {
             fromAbsolute: moveInformation.from,
             toAbsolute: moveInformation.to,
-            type: moveInformation.moveType
-        }
-        if (moveInformation.moveType === MoveTypes.PROMOTION) {
-            move.promotionPiece = moveInformation.promotionPiece as PieceType
+            specialType: moveInformation.moveType
         }
     }
 

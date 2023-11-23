@@ -1,6 +1,6 @@
 import { PieceColor, Color, Move, PositionAbsolute, SpecialMove } from "chess/lib/constants/ChessConstants";
-import { WebsocketCLient } from "chess/lib/communication/Websocket";
-import { MoveInformation, PlayerInformation, WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
+import { WebsocketCLient as WebsocketClient } from "chess/lib/communication/Websocket";
+import { WebsocketMessage, PlayerInformation, WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -20,7 +20,7 @@ export interface PlayerMetaStore {
     token: string;
     valid: boolean;
     setId: (id: string) => void;
-    setToken: (passPhrase: string) => void;
+    setToken: (token: string) => void;
     setValid: (valid: boolean) => void;
 }
 
@@ -40,7 +40,7 @@ export const usePlayerStore = create<PlayerMetaStore>()(
 
 export class Session {
     player: Signal<Player>;
-    connection: WebsocketCLient;
+    connection: WebsocketClient;
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
     boardPosition: Signal<string>;
     specialMoves: Signal<SpecialMove[]>;
@@ -48,9 +48,8 @@ export class Session {
 
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
         player: Signal<Player>, specialMoves: Signal<SpecialMove[]>) {
-        this.connection = new WebsocketCLient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
+        this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
         this.connection.addHandler(console.log)                                             //TODO: Evtl am Ende entfernen
-        this.connection.addHandler(this.receiveMove)
         this.player = player;
         this.validMoves = validMoves
         this.boardPosition = boardPosition
@@ -63,7 +62,14 @@ export class Session {
             id: this.player.value.id,
             token: this.player.value.token
         }
-        await getGame(playerInformation).then((res) => this.player.value.color = res.color as PieceColor)
+        await getGame(playerInformation).then((res) => {
+            let newPlayer = {
+                id: this.player.value.id,
+                token: this.player.value.token,
+                color: res.color as PieceColor
+            }
+            this.player.value = newPlayer
+        })
 
         await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
     }
@@ -87,8 +93,8 @@ export class Session {
             token: this.player.value.token
         }
         await getValidMoves(playerInformation).then((data) => {
-            this.validMoves.value = data.validMoves
-            this.specialMoves.value = data.specialMoves
+            this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>(Object.entries(data.validMoves))
+            this.specialMoves.value = Array.from(data.specialMoves)
         })
     }
 
@@ -101,7 +107,7 @@ export class Session {
     receiveMove(moveInformationString: string) {
         void this.fetchValidMoves()
 
-        let moveInformation: MoveInformation
+        let moveInformation: WebsocketMessage
         try {
             moveInformation = JSON.parse(moveInformationString)
         } catch (e) {

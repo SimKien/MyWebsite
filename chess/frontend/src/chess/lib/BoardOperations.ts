@@ -35,15 +35,15 @@ export function movePiece(move: Move, board: string[][], specialMove: SpecialMov
     result[move.fromRelative[0]][move.fromRelative[1]] = "";
     result[move.toRelative[0]][move.toRelative[1]] = temp;
     if (specialMove) {
-        if (specialMove.type === MoveTypes.CASTLING) {
+        if (specialMove.specialType === MoveTypes.CASTLING) {
             const rookTargetCol = (move.toRelative[1] + move.fromRelative[1]) / 2;
             const rookSourceCol = move.toRelative[1] > move.fromRelative[1] ? 7 : 0;
             result[move.toRelative[0]][rookTargetCol] = result[move.toRelative[0]][rookSourceCol];
             result[move.fromRelative[0]][rookSourceCol] = "";
-        } else if (specialMove.type === MoveTypes.EN_PASSANT) {
+        } else if (specialMove.specialType === MoveTypes.EN_PASSANT) {
             const enPassantTargetRow = move.fromRelative[0]
             result[enPassantTargetRow][move.toRelative[1]] = "";
-        } else if (specialMove.type === MoveTypes.PROMOTION) {
+        } else if (specialMove.specialType === MoveTypes.PROMOTION) {
             if (move.promotionPiece === undefined) return result;
             let promotionPiece = result[move.toRelative[0]][move.toRelative[1]] === result[move.toRelative[0]][move.toRelative[1]].toUpperCase() ? move.promotionPiece.toUpperCase() : move.promotionPiece.toLowerCase();
             result[move.toRelative[0]][move.toRelative[1]] = promotionPiece;

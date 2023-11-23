@@ -17,12 +17,12 @@ export const WebsocketTypes = {
 }
 
 //send and receive json of move of websocket connection
-export type MoveInformation = {
+export type WebsocketMessage = {
     messageType: string,
     from: PositionAbsolute,
     to: PositionAbsolute,
     moveType: string,
-    promotionPiece?: string
+    promotionPiece: string
 };
 
 //receive json of endpoint /game

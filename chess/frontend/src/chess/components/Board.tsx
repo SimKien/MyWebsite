@@ -23,10 +23,10 @@ export default function Board(props: {
     }, []);
 
     useEffect(() => {
+        board.value = loadPosition(props.boardPosition.value, BoardSize);
         if (boardOrientation.current === Color.BLACK) {
             board.value = turnBoard(board.value, BoardSize)
         }
-        board.value = loadPosition(props.boardPosition.value, BoardSize);
     }, [props.boardPosition.value]);
 
     useEffect(() => {

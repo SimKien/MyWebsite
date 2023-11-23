@@ -24,13 +24,13 @@ export interface Move {
     toRelative: PositionRelative;
     fromAbsolute: PositionAbsolute;
     toAbsolute: PositionAbsolute;
-    promotionPiece?: PieceType;
+    promotionPiece: PieceType;
 };
 
 export type SpecialMove = {
     fromAbsolute: PositionAbsolute,
     toAbsolute: PositionAbsolute,
-    type: string
+    specialType: string
 }
 
 export const Piece_names = {
