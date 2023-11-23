@@ -1,0 +1,49 @@
+use std::{collections::BTreeSet, sync::Mutex};
+
+use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
+use serde_json::{map::Map, Value};
+use specta::{ExportError, Type, TypeDefs};
+
+pub static TYPES: &Lazy<Mutex<(TypeDefs, BTreeSet<ExportError>)>> = &specta::export::TYPES;
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct SpecialMove {
+    pub from_absolute: String,
+    pub to_absolute: String,
+    pub special_type: String,
+}
+
+//Communication structs to Frontend
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct WebsocketMessage {
+    pub message_type: String,
+    pub from: String,
+    pub to: String,
+    pub move_type: String,
+    pub promotion_piece: String,
+}
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct PlayerGameInformation {
+    pub id: String,
+    pub token: String,
+    pub color: String,
+}
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct BoardPositionInformation {
+    pub board_position: String,
+}
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct ValidMovesInformation {
+    pub valid_moves: Map<String, Value>,
+    pub special_moves: Vec<SpecialMove>,
+}
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct PlayerInformation {
+    pub id: String,
+    pub token: String,
+}

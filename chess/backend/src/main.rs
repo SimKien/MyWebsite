@@ -7,17 +7,21 @@ use axum::{
     routing::{get, get_service},
     Json, Router,
 };
-//use futures_util::stream::StreamExt;
-use futures_util::{SinkExt, StreamExt};
-use message_types::{
-    BoardPositionInformation, MoveInformation, PlayerGameInformation, PlayerInformation,
-    PlayerQuery, SpecialMove, ValidMovesInformation,
+use comlib::{
+    BoardPositionInformation, PlayerGameInformation, PlayerInformation, ValidMovesInformation,
+    WebsocketMessage,
 };
+use futures_util::{SinkExt, StreamExt};
+use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::{error, warn};
 
-mod message_types;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PlayerQuery {
+    pub player_id: String,
+    pub token: String,
+}
 
 const FRONTEND_BASE_DIR: &str = "../frontend/dist";
 
@@ -37,7 +41,7 @@ async fn handle_socket(socket: WebSocket) {
                     msg.into_text().ok()
                 }
             }) {
-                if let Ok(msg) = serde_json::from_str::<MoveInformation>(&msg) {
+                if let Ok(msg) = serde_json::from_str::<WebsocketMessage>(&msg) {
                     msg
                 } else {
                     warn!("Received invalid message: {}", msg);
@@ -48,14 +52,14 @@ async fn handle_socket(socket: WebSocket) {
                 return;
             };
             println!("{:?}", msg);
-            let moveInfo = MoveInformation {
-                messageType: String::from("move"),
+            let move_info = WebsocketMessage {
+                message_type: String::from("move"),
                 from: String::from("e7"),
                 to: String::from("e5"),
-                moveType: String::from("normal"),
-                promotionPiece: String::from("Q"),
+                move_type: String::from("normal"),
+                promotion_piece: String::from("Q"),
             };
-            let msg = serde_json::to_string(&moveInfo).unwrap();
+            let msg = serde_json::to_string(&move_info).unwrap();
             if sender.send(msg.into()).await.is_err() {
                 error!("Failed to send message");
                 return;
@@ -70,7 +74,7 @@ async fn get_board_position(
     //TODO: Checks for the right game and return this board as string
 
     let board_position = BoardPositionInformation {
-        boardPosition: String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"),
+        board_position: String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"),
     };
     Json(board_position)
 }
@@ -97,8 +101,8 @@ async fn get_valid_moves(
     );
 
     let valid_moves = ValidMovesInformation {
-        validMoves: valid_moves_map,
-        specialMoves: Vec::new(),
+        valid_moves: valid_moves_map,
+        special_moves: Vec::new(),
     };
 
     Json(valid_moves)

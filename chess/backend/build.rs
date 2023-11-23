@@ -6,13 +6,27 @@ use std::process::Command;
 fn main() {
     let cmd = if cfg!(windows) { "npm.cmd" } else { "npm" };
 
+    {
+        let types = comlib::TYPES.lock().unwrap().clone();
+        let mut lock = specta::export::TYPES.lock().unwrap();
+
+        *lock = types;
+    }
+    specta::export::ts("../frontend/src/lib/bindings.ts").unwrap();
+
     // Get the project directory
     let project_dir = env::current_dir().unwrap();
 
     // Build the path to the `liberica` directory
     let frontend_dir = project_dir.parent().unwrap().join("frontend");
 
-    for path in ["package.json", "src", "tsconfig.json", "index.html"] {
+    for path in [
+        "package.json",
+        "src",
+        "tsconfig.json",
+        "index.html",
+        "../comlib",
+    ] {
         println!(
             "cargo:rerun-if-changed={}/{}",
             frontend_dir.to_string_lossy(),
