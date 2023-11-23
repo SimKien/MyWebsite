@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::{
     extract::{
         ws::{WebSocket, WebSocketUpgrade},
@@ -13,7 +15,6 @@ use comlib::{
 };
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::{error, warn};
 
@@ -69,7 +70,7 @@ async fn handle_socket(socket: WebSocket) {
 }
 
 async fn get_board_position(
-    Query(player_information): Query<PlayerQuery>,
+    Query(_player_information): Query<PlayerQuery>,
 ) -> Json<BoardPositionInformation> {
     //TODO: Checks for the right game and return this board as string
 
@@ -80,24 +81,18 @@ async fn get_board_position(
 }
 
 async fn get_valid_moves(
-    Query(player_information): Query<PlayerQuery>,
+    Query(_player_information): Query<PlayerQuery>,
 ) -> Json<ValidMovesInformation> {
     //TODO
 
-    let mut valid_moves_map: Map<String, Value> = Map::new();
+    let mut valid_moves_map: HashMap<String, Vec<String>> = HashMap::new();
     valid_moves_map.insert(
         String::from("e2"),
-        Value::Array(vec![
-            Value::String(String::from("e3")),
-            Value::String(String::from("e4")),
-        ]),
+        Vec::from([String::from("e4"), String::from("e3")]),
     );
     valid_moves_map.insert(
         String::from("d2"),
-        Value::Array(vec![
-            Value::String(String::from("d4")),
-            Value::String(String::from("d3")),
-        ]),
+        Vec::from([String::from("d4"), String::from("d3")]),
     );
 
     let valid_moves = ValidMovesInformation {

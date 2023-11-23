@@ -1,5 +1,5 @@
 import { Signal } from "@preact/signals-react";
-import { Color, Move, Piece, PieceColor, PieceType, Piece_dnd_type, Piece_names, PositionAbsolute, PositionInfo, PositionRelative, SpecialMove } from "chess/lib/constants/ChessConstants";
+import { Color, Move, Piece, PieceColor, PieceType, Piece_dnd_type, Piece_names, PositionAbsolute, PositionInfo, PositionRelative } from "chess/lib/constants/ChessConstants";
 import { useMemo, useRef, useState } from "react";
 import { getAbsolutePosition, isWhiteSquare } from "chess/lib/BoardOperations";
 import { MoveTypes } from "chess/lib/constants/WebsocketConstants";
@@ -7,6 +7,7 @@ import { useDrop } from "react-dnd";
 import { PieceComponent } from "chess/components/Piece";
 import "chess/style/Square.css";
 import PromotionSelection from "chess/components/PromotionSelection";
+import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 export default function Square(props: {
     rindex: number, cindex: number, makeMove: (move: Move, specialMove: SpecialMove | undefined) => void, piece: string,
@@ -43,9 +44,9 @@ export default function Square(props: {
         }
         if (item.positionAbsolute === posAbsolut) return;
         let specialMove = props.specialMoves.find((specialMove) => {
-            return specialMove.fromAbsolute === item.positionAbsolute && specialMove.toAbsolute === posAbsolut
+            return specialMove.from_absolute === item.positionAbsolute && specialMove.to_absolute === posAbsolut
         });
-        if (specialMove !== undefined && specialMove.specialType === MoveTypes.PROMOTION) {
+        if (specialMove !== undefined && specialMove.special_type === MoveTypes.PROMOTION) {
             moveStore.current = [move, specialMove];
             setPromotionDialog([true, item.color]);
             return;

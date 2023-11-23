@@ -1,8 +1,11 @@
-use std::{collections::BTreeSet, sync::Mutex};
+#![allow(non_snake_case)]
+use std::{
+    collections::{BTreeSet, HashMap},
+    sync::Mutex,
+};
 
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use serde_json::{map::Map, Value};
 use specta::{ExportError, Type, TypeDefs};
 
 pub static TYPES: &Lazy<Mutex<(TypeDefs, BTreeSet<ExportError>)>> = &specta::export::TYPES;
@@ -38,7 +41,7 @@ pub struct BoardPositionInformation {
 
 #[derive(Type, Serialize, Deserialize, Debug)]
 pub struct ValidMovesInformation {
-    pub valid_moves: Map<String, Value>,
+    pub valid_moves: HashMap<String, Vec<String>>,
     pub special_moves: Vec<SpecialMove>,
 }
 

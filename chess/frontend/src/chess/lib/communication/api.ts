@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BoardPositionInformation, PlayerGameInformation, PlayerInformation, ValidMovesInformation } from "chess/lib/constants/WebsocketConstants";
+import { BoardPositionInformation, PlayerGameInformation, PlayerInformation, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
 
 const HOSTNAME_DEV = "localhost:8080";
 const HOSTNAME_PROD = window.location.host;

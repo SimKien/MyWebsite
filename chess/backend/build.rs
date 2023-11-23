@@ -12,7 +12,7 @@ fn main() {
 
         *lock = types;
     }
-    specta::export::ts("../frontend/src/lib/bindings.ts").unwrap();
+    specta::export::ts("../frontend/src/chess/lib/constants/CommunicationConstants.ts").unwrap();
 
     // Get the project directory
     let project_dir = env::current_dir().unwrap();

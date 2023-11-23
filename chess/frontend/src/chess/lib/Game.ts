@@ -1,11 +1,12 @@
-import { PieceColor, Color, Move, PositionAbsolute, SpecialMove } from "chess/lib/constants/ChessConstants";
+import { PieceColor, Color, Move, PositionAbsolute } from "chess/lib/constants/ChessConstants";
 import { WebsocketCLient as WebsocketClient } from "chess/lib/communication/Websocket";
-import { WebsocketMessage, PlayerInformation, WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
+import { WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getNewPlayer, getValidMoves } from "chess/lib/communication/api";
 import { convertToMoveInformation, convertToMoves } from "chess/lib/communication/WSDataParser";
+import { WebsocketMessage, PlayerInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 const PLAYER_STORE_KEY = "player";
 
@@ -84,7 +85,7 @@ export class Session {
             id: this.player.value.id,
             token: this.player.value.token
         }
-        await getBoardPosition(playerInformation).then((res) => this.boardPosition.value = res.boardPosition)
+        await getBoardPosition(playerInformation).then((res) => this.boardPosition.value = res.board_position)
     }
 
     async fetchValidMoves() {
@@ -93,8 +94,8 @@ export class Session {
             token: this.player.value.token
         }
         await getValidMoves(playerInformation).then((data) => {
-            this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>(Object.entries(data.validMoves))
-            this.specialMoves.value = Array.from(data.specialMoves)
+            this.validMoves.value = new Map<String, String[]>(Object.entries(data.valid_moves)) as Map<PositionAbsolute, PositionAbsolute[]>
+            this.specialMoves.value = Array.from(data.special_moves)
         })
     }
 
@@ -114,7 +115,7 @@ export class Session {
             console.log(e)
             return
         }
-        if (moveInformation.messageType !== WebsocketTypes.MOVE) return
+        if (moveInformation.message_type !== WebsocketTypes.MOVE) return
 
         const [move, specialMove] = convertToMoves(moveInformation)
 

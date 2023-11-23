@@ -1,3 +1,5 @@
+import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
+
 export type PieceType = "K" | "Q" | "R" | "B" | "N" | "P";
 export type PieceColor = 'white' | 'black';
 
@@ -26,12 +28,6 @@ export interface Move {
     toAbsolute: PositionAbsolute;
     promotionPiece: PieceType;
 };
-
-export type SpecialMove = {
-    fromAbsolute: PositionAbsolute,
-    toAbsolute: PositionAbsolute,
-    specialType: string
-}
 
 export const Piece_names = {
     King: "K",

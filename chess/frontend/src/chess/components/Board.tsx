@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
 import "chess/style/Board.css";
-import { Color, PieceColor, Move, BoardSize, BoardOperations, PositionAbsolute, SpecialMove } from "chess/lib/constants/ChessConstants"
+import { Color, PieceColor, Move, BoardSize, BoardOperations, PositionAbsolute } from "chess/lib/constants/ChessConstants"
 import { loadPosition, movePiece, turnBoard, getRelativePosition } from "chess/lib/BoardOperations";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Signal, signal } from "@preact/signals-react";
 import { Player } from "chess/lib/Game";
+import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 import Square from "chess/components/Square";
 
 const board = signal<string[][]>((new Array(BoardSize).fill(new Array(BoardSize).fill(""))));

@@ -1,5 +1,6 @@
-import { Color, Move, PieceColor, PositionAbsolute, PositionRelative, SpecialMove, colToLetter, letterToCol } from "chess/lib/constants/ChessConstants";
+import { Color, Move, PieceColor, PositionAbsolute, PositionRelative, colToLetter, letterToCol } from "chess/lib/constants/ChessConstants";
 import { MoveTypes } from "chess/lib/constants/WebsocketConstants";
+import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 export function isWhiteSquare(rindex: number, cindex: number) {
     return (rindex + cindex) % 2 === 0;
@@ -35,15 +36,15 @@ export function movePiece(move: Move, board: string[][], specialMove: SpecialMov
     result[move.fromRelative[0]][move.fromRelative[1]] = "";
     result[move.toRelative[0]][move.toRelative[1]] = temp;
     if (specialMove) {
-        if (specialMove.specialType === MoveTypes.CASTLING) {
+        if (specialMove.special_type === MoveTypes.CASTLING) {
             const rookTargetCol = (move.toRelative[1] + move.fromRelative[1]) / 2;
             const rookSourceCol = move.toRelative[1] > move.fromRelative[1] ? 7 : 0;
             result[move.toRelative[0]][rookTargetCol] = result[move.toRelative[0]][rookSourceCol];
             result[move.fromRelative[0]][rookSourceCol] = "";
-        } else if (specialMove.specialType === MoveTypes.EN_PASSANT) {
+        } else if (specialMove.special_type === MoveTypes.EN_PASSANT) {
             const enPassantTargetRow = move.fromRelative[0]
             result[enPassantTargetRow][move.toRelative[1]] = "";
-        } else if (specialMove.specialType === MoveTypes.PROMOTION) {
+        } else if (specialMove.special_type === MoveTypes.PROMOTION) {
             if (move.promotionPiece === undefined) return result;
             let promotionPiece = result[move.toRelative[0]][move.toRelative[1]] === result[move.toRelative[0]][move.toRelative[1]].toUpperCase() ? move.promotionPiece.toUpperCase() : move.promotionPiece.toLowerCase();
             result[move.toRelative[0]][move.toRelative[1]] = promotionPiece;

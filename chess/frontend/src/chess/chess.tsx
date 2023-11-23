@@ -3,7 +3,8 @@ import "chess/style/Chess.css"
 import { signal } from "@preact/signals-react";
 import { Player, Session, usePlayerStore } from "chess/lib/Game";
 import { useEffect, useRef } from "react";
-import { BoardOperations, Color, Move, PositionAbsolute, SpecialMove } from "chess/lib/constants/ChessConstants";
+import { BoardOperations, Color, Move, PositionAbsolute } from "chess/lib/constants/ChessConstants";
+import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 const boardPosition = signal<string>("");
 const validMoves = signal<Map<PositionAbsolute, PositionAbsolute[]>>(new Map<PositionAbsolute, PositionAbsolute[]>());
