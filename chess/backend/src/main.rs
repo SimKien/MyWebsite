@@ -122,7 +122,7 @@ async fn get_valid_moves(
         String::from("e1"),
         Vec::from([String::from("g1"), String::from("f1")]),
     );
-    let mut special_moves = Vec::<SpecialMove>::new();
+    let mut special_moves = Vec::new();
     special_moves.push(SpecialMove {
         from_absolute: String::from("e1"),
         to_absolute: String::from("g1"),
@@ -131,7 +131,7 @@ async fn get_valid_moves(
 
     let valid_moves = ValidMovesInformation {
         valid_moves: valid_moves_map,
-        special_moves: Vec::new(),
+        special_moves: special_moves,
     };
 
     Json(valid_moves)
