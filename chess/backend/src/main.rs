@@ -17,16 +17,32 @@ use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::{error, warn};
+use util::UniqueIdGenerator;
+use uuid::Uuid;
+
+mod util;
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct PlayerQuery {
-    pub player_id: String,
-    pub token: String,
+struct PlayerQuery {
+    player_id: String,
+    token: String,
+}
+
+struct Client {
+    id: Uuid,
+    token: String,
+    game_id: Uuid,
+}
+
+struct AppState {
+    id_generator: UniqueIdGenerator,
+    connections: HashMap<u64, Client>,
 }
 
 const FRONTEND_BASE_DIR: &str = "../frontend/dist";
 
-async fn handler(ws: WebSocketUpgrade) -> Response {
+async fn handler(ws: WebSocketUpgrade, Query(player_information): Query<PlayerQuery>) -> Response {
+    println!("New connection {}", player_information.player_id);
     ws.on_upgrade(|socket| handle_socket(socket))
 }
 
@@ -70,7 +86,7 @@ async fn handle_socket(socket: WebSocket) {
 }
 
 async fn get_board_position(
-    Query(_player_information): Query<PlayerQuery>,
+    Query(player_information): Query<PlayerQuery>,
 ) -> Json<BoardPositionInformation> {
     //TODO: Checks for the right game and return this board as string
 
@@ -81,7 +97,7 @@ async fn get_board_position(
 }
 
 async fn get_valid_moves(
-    Query(_player_information): Query<PlayerQuery>,
+    Query(player_information): Query<PlayerQuery>,
 ) -> Json<ValidMovesInformation> {
     //TODO
 

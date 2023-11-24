@@ -41,7 +41,7 @@ export const usePlayerStore = create<PlayerMetaStore>()(
 
 export class Session {
     player: Signal<Player>;
-    connection: WebsocketClient;
+    connection: WebsocketClient | undefined;
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
     boardPosition: Signal<string>;
     specialMoves: Signal<SpecialMove[]>;
@@ -49,8 +49,7 @@ export class Session {
 
     constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
         player: Signal<Player>, specialMoves: Signal<SpecialMove[]>) {
-        this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS)
-        this.connection.addHandler(console.log)                                             //TODO: Evtl am Ende entfernen
+        this.connection = undefined
         this.player = player;
         this.validMoves = validMoves
         this.boardPosition = boardPosition
@@ -59,6 +58,21 @@ export class Session {
     }
 
     async generateSession() {
+        await Promise.all([this.createGame(), this.connectToWebsocket()])
+
+        await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
+    }
+
+    async connectToWebsocket() {
+        let playerInformation: PlayerInformation = {
+            id: this.player.value.id,
+            token: this.player.value.token
+        }
+        this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
+        this.connection.addHandler(console.log)                                             //TODO: Evtl am Ende entfernen
+    }
+
+    async createGame() {
         let playerInformation: PlayerInformation = {
             id: this.player.value.id,
             token: this.player.value.token
@@ -71,8 +85,6 @@ export class Session {
             }
             this.player.value = newPlayer
         })
-
-        await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
     }
 
     async createPlayer() {
@@ -102,7 +114,7 @@ export class Session {
     reportMove(move: Move, specialMove: SpecialMove | undefined) {
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
         let moveInfo = convertToMoveInformation(move, specialMove)
-        this.connection.send(JSON.stringify(moveInfo))
+        this.connection?.send(JSON.stringify(moveInfo))
     }
 
     receiveMove(moveInformationString: string) {

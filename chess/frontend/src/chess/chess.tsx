@@ -36,7 +36,7 @@ export default function Chess() {
             session.player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token }
         }
         await session.generateSession()
-        session.connection.addHandler(receiveMove);
+        session.connection?.addHandler(receiveMove);
     }
 
     useEffect(() => {
