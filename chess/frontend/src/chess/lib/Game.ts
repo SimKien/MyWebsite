@@ -112,6 +112,16 @@ export class Session {
     }
 
     reportMove(move: Move, specialMove: SpecialMove | undefined) {
+        if (this.connection?.connection.readyState !== WebSocket.OPEN) {
+            let handlers = this.connection?.handlers
+            let playerInformation: PlayerInformation = {
+                id: this.player.value.id,
+                token: this.player.value.token
+            }
+            this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
+            handlers?.forEach((handler) => this.connection?.addHandler(handler))
+        }
+
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
         let moveInfo = convertToMoveInformation(move, specialMove)
         this.connection?.send(JSON.stringify(moveInfo))
