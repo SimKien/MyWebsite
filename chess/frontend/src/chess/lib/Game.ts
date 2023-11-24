@@ -33,7 +33,7 @@ export const usePlayerStore = create<PlayerMetaStore>()(
             valid: false,
             setId: (id: string) => set({ id }),
             setToken: (token: string) => set({ token }),
-            setValid: (valid: boolean) => set({ valid })
+            setValid: (valid: boolean) => set({ valid }),
         }),
         { name: PLAYER_STORE_KEY }
     )
@@ -71,6 +71,9 @@ export class Session {
             token: this.player.value.token
         }
         this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
+        while (this.connection.connection.readyState === WebSocket.CONNECTING) {
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
     }
 
     async createGame() {
