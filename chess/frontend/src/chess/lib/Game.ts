@@ -71,9 +71,6 @@ export class Session {
             token: this.player.value.token
         }
         this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
-        while (this.connection.connection.readyState === WebSocket.CONNECTING) {
-            await new Promise(resolve => setTimeout(resolve, 20));
-        }
     }
 
     async createGame() {
@@ -115,22 +112,11 @@ export class Session {
         })
     }
 
-    async reconnectToWebsocket() {
-        let handlers = this.connection?.handlers
-        this.connection?.connection.close()
-        this.connection = undefined
-        await this.connectToWebsocket()
-        handlers?.forEach((handler) => this.connection?.addHandler(handler))
-    }
-
-    async reportMove(move: Move, specialMove: SpecialMove | undefined) {
-        if (this.connection?.connection.readyState !== WebSocket.OPEN) {
-            await this.reconnectToWebsocket()
-        }
+    reportMove(move: Move, specialMove: SpecialMove | undefined) {
+        let moveInfo = convertToMoveInformation(move, specialMove)
 
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
-        let moveInfo = convertToMoveInformation(move, specialMove)
-        this.connection?.send(JSON.stringify(moveInfo))
+        this.connection?.send(moveInfo)
     }
 
     receiveMove(moveInformationString: string) {
