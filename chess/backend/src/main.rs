@@ -10,8 +10,8 @@ use axum::{
     Json, Router,
 };
 use comlib::{
-    BoardPositionInformation, PlayerGameInformation, PlayerInformation, ValidMovesInformation,
-    WebsocketMessage,
+    BoardPositionInformation, PlayerGameInformation, PlayerInformation, SpecialMove,
+    ValidMovesInformation, WebsocketMessage,
 };
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -110,6 +110,24 @@ async fn get_valid_moves(
         String::from("d2"),
         Vec::from([String::from("d4"), String::from("d3")]),
     );
+    valid_moves_map.insert(
+        String::from("f1"),
+        Vec::from([String::from("d3"), String::from("c4")]),
+    );
+    valid_moves_map.insert(
+        String::from("g1"),
+        Vec::from([String::from("e2"), String::from("f3")]),
+    );
+    valid_moves_map.insert(
+        String::from("e1"),
+        Vec::from([String::from("g1"), String::from("f1")]),
+    );
+    let mut special_moves = Vec::<SpecialMove>::new();
+    special_moves.push(SpecialMove {
+        from_absolute: String::from("e1"),
+        to_absolute: String::from("g1"),
+        special_type: String::from("castling"),
+    });
 
     let valid_moves = ValidMovesInformation {
         valid_moves: valid_moves_map,
