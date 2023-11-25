@@ -1,7 +1,6 @@
 .square {
-    height: 2.9rem;
-    width: 2.9rem;
-    /* Use device-detect and isMobile to render touch-backend if device is Mobile */
+    height: max(min(5rem, ((100vh - 60px) / 10)), 1rem);
+    width: max(min(5rem, ((100vh - 60px) / 10)), 1rem);
     border: none;
     display: flex;
     flex-direction: column;
@@ -11,10 +10,11 @@
     overflow: hidden;
 }
 
-@media only screen and (min-width: 601px) {
+@media only screen and (orientation: portrait) {
     .square {
-        height: 4.5rem;
-        width: 4.5rem;
+        height: max(min(4rem, ((100vh - 60px) / 10)), 1rem);
+        width: max(min(4rem, ((100vh - 60px) / 10)), 1rem);
+        /* Use device-detect and isMobile to render touch-backend if device is Mobile */
         border: none;
         display: flex;
         flex-direction: column;
@@ -22,48 +22,6 @@
         align-items: center;
         position: relative;
         overflow: hidden;
-    }
-}
-
-@media only screen and (min-width: 992px) {
-    .square {
-        height: 5.2rem;
-        width: 5.2rem;
-        border: none;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-    }
-}
-
-@media only screen and (orientation: landscape) {
-    .square {
-        height: 2.2rem;
-        width: 2.2rem;
-        border: none;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    @media only screen and (min-heigth: 600px) {
-        .square {
-            height: 3.6rem;
-            width: 3.6rem;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
     }
 }
 
