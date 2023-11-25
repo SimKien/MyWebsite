@@ -14,7 +14,6 @@
     .square {
         height: max(min(4rem, ((100vw - 60px) / 10)), 1rem);
         width: max(min(4rem, ((100vw - 60px) / 10)), 1rem);
-        /* Use device-detect and isMobile to render touch-backend if device is Mobile */
         border: none;
         display: flex;
         flex-direction: column;
