@@ -1,6 +1,7 @@
 .square {
-    height: 5rem;
-    width: 5rem;
+    height: 2.9rem;
+    width: 2.9rem;
+    /* Use device-detect and isMobile to render touch-backend if device is Mobile */
     border: none;
     display: flex;
     flex-direction: column;
@@ -8,6 +9,34 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+}
+
+@media only screen and (min-width: 601px) {
+    .square {
+        height: 4.5rem;
+        width: 4.5rem;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .square {
+        height: 5.2rem;
+        width: 5.2rem;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
 }
 
 .white {

@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import "chess/style/Board.css";
 import { Color, PieceColor, Move, BoardSize, BoardOperations, PositionAbsolute } from "chess/lib/constants/ChessConstants"
 import { loadPosition, movePiece, turnBoard, getRelativePosition } from "chess/lib/BoardOperations";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { Signal, signal } from "@preact/signals-react";
 import { Player } from "chess/lib/Game";
 import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
@@ -59,18 +57,16 @@ export default function Board(props: {
     }
 
     return (
-        <DndProvider backend={HTML5Backend}>
-            <div className="board" id="mainboard">
-                {
-                    board.value.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
-                        row.map((_, cindex) => {
-                            return <Square key={cindex.toString()} rindex={rindex} cindex={cindex} makeMove={makeClientMove}
-                                piece={board.value[rindex][cindex]} boardOrientation={boardOrientation.current} validMoves={props.validMoves}
-                                specialMoves={props.specialMoves.value} size={BoardSize} />
-                        })
-                    }</div>)
-                }
-            </div>
-        </DndProvider>
+        <div className="board" id="mainboard">
+            {
+                board.value.map((row, rindex) => <div className="row" id={`r${rindex}`} key={rindex.toString()}>{
+                    row.map((_, cindex) => {
+                        return <Square key={cindex.toString()} rindex={rindex} cindex={cindex} makeMove={makeClientMove}
+                            piece={board.value[rindex][cindex]} boardOrientation={boardOrientation.current} validMoves={props.validMoves}
+                            specialMoves={props.specialMoves.value} size={BoardSize} />
+                    })
+                }</div>)
+            }
+        </div>
     );
 }
