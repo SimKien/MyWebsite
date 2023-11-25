@@ -1,6 +1,6 @@
 .square {
-    height: max(min(5rem, ((100vh - 60px) / 10)), 1rem);
-    width: max(min(5rem, ((100vh - 60px) / 10)), 1rem);
+    height: min(5rem, ((100vh - 80px) / 10));
+    width: min(5rem, ((100vh - 80px) / 10));
     border: none;
     display: flex;
     flex-direction: column;
@@ -10,10 +10,24 @@
     overflow: hidden;
 }
 
+@media only screen and (max-height: 640px) {
+    .square {
+        height: max(min(5rem, ((100vh - 100px) / 12)), 1.5rem);
+        width: max(min(5rem, ((100vh - 100px) / 12)), 1.5rem);
+        border: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+}
+
 @media only screen and (orientation: portrait) {
     .square {
-        height: max(min(4rem, ((100vw - 60px) / 10)), 1rem);
-        width: max(min(4rem, ((100vw - 60px) / 10)), 1rem);
+        height: max(min(4rem, ((100vw - 60px) / 9)), 1.5rem);
+        width: max(min(4rem, ((100vw - 60px) / 9)), 1.5rem);
         border: none;
         display: flex;
         flex-direction: column;

@@ -13,6 +13,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+//In html5backend is a drag preview implemented by default, but in touchbackend it is not, so its now implemented manually here
 const MobilePreview = () => {
   const preview = usePreview();
   if (!preview.display) {
@@ -23,7 +24,8 @@ const MobilePreview = () => {
   return <PieceDragPreview piece={piece} style={style} />
 }
 
-let chess = isMobile ?
+//differentiate between mobile (touch) and desktop (html5) devices
+const chess = isMobile ?
   <DndProvider backend={TouchBackend}>
     <Chess />
     <MobilePreview />
