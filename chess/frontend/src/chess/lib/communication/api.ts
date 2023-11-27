@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BoardPositionInformation, PlayerGameInformation, PlayerInformation, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
+import { BoardPositionInformation, PlayerGameInformation, PlayerInformation, PlayerValid, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
 
 const HOSTNAME_DEV = "localhost:8080";
 const HOSTNAME_PROD = window.location.host;
@@ -19,6 +19,7 @@ export const ENDPOINTS = {
     GET_VALID_MOVES: "/valid-moves",        //Returns a map of valid moves, gives id and token of the player via query params
     GET_BOARD_POSITION: "/board-position",  //Returns the current board position, gives id and token of the player via query params
     GET_PLAYER: "/player",                  //Returns a new player
+    GET_IS_VALID: "/is-valid",              //Returns whether a player is valid, gives id and token of the player via query params
     GET_WS: "/ws"                           //Returns a new websocket connection
 }
 
@@ -31,3 +32,5 @@ export const getGame = (playerInformation: PlayerInformation): Promise<PlayerGam
 export const getBoardPosition = (playerInformation: PlayerInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
 
 export const getValidMoves = (playerInformation: PlayerInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+
+export const getIsValid = (playerInformation: PlayerInformation): Promise<PlayerValid> => AXIOS.get(ENDPOINTS.GET_IS_VALID + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)

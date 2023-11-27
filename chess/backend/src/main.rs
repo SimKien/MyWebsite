@@ -10,7 +10,7 @@ use axum::{
     Json, Router,
 };
 use comlib::{
-    BoardPositionInformation, PlayerGameInformation, PlayerInformation, SpecialMove,
+    BoardPositionInformation, PlayerGameInformation, PlayerInformation, PlayerValid, SpecialMove,
     ValidMovesInformation, WebsocketMessage,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -399,6 +399,36 @@ async fn get_player(State(state): State<SharedState>) -> Json<PlayerInformation>
     Json(player)
 }
 
+async fn is_player_valid(
+    State(state): State<SharedState>,
+    Query(player_information): Query<PlayerQuery>,
+) -> Json<PlayerValid> {
+    let player_id = player_information.player_id.clone();
+    let player_uuid_parse = Uuid::parse_str(&player_id);
+
+    if player_uuid_parse.is_err() {
+        return Json(PlayerValid { valid: false });
+    }
+
+    let player_uuid = player_uuid_parse.unwrap();
+
+    let locked_state = state.lock().await;
+
+    let player_get = locked_state.players.get(&player_uuid);
+
+    if player_get.is_none() {
+        return Json(PlayerValid { valid: false });
+    }
+
+    let player = player_get.unwrap();
+
+    let player_valid = PlayerValid {
+        valid: validate_player(&player_information, player),
+    };
+
+    Json(player_valid)
+}
+
 #[tokio::main]
 async fn main() {
     let state = AppState::new();
@@ -424,6 +454,7 @@ async fn main() {
         .route("/valid-moves", get(get_valid_moves))
         .route("/board-position", get(get_board_position))
         .route("/player", get(get_player))
+        .route("/is-valid", get(is_player_valid))
         .with_state(state.clone());
 
     let app = Router::new()

@@ -4,7 +4,7 @@ import { WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getNewPlayer, getValidMoves } from "chess/lib/communication/api";
+import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getIsValid, getNewPlayer, getValidMoves } from "chess/lib/communication/api";
 import { convertToMoveInformation, convertToMoves } from "chess/lib/communication/WSDataParser";
 import { WebsocketMessage, PlayerInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
@@ -71,6 +71,16 @@ export class Session {
             token: this.player.value.token
         }
         this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
+    }
+
+    async isPlayerValid() {
+        let playerInformation: PlayerInformation = {
+            id: this.player.value.id,
+            token: this.player.value.token
+        }
+        let valid = false
+        await getIsValid(playerInformation).then((res) => { valid = res.valid })
+        return valid
     }
 
     async createGame() {

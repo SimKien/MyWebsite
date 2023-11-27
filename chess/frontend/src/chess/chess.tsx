@@ -34,6 +34,14 @@ export default function Chess() {
         } else {
             player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token };
             session.player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token }
+
+            let valid = await session.isPlayerValid()
+            if (!valid) {
+                await session.createPlayer();
+                playerStore.setId(session.player.value.id);
+                playerStore.setToken(session.player.value.token);
+                playerStore.setValid(true);
+            }
         }
         await session.generateSession()
         session.connection?.addHandler(receiveMove);

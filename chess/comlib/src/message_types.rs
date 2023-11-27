@@ -51,3 +51,8 @@ pub struct PlayerInformation {
     pub id: String,
     pub token: String,
 }
+
+#[derive(Type, Serialize, Deserialize, Debug)]
+pub struct PlayerValid {
+    pub valid: bool,
+}

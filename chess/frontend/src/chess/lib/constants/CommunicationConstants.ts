@@ -10,5 +10,7 @@ export type ValidMovesInformation = { valid_moves: { [key: string]: string[] }; 
 
 export type PlayerInformation = { id: string; token: string }
 
+export type PlayerValid = { valid: boolean }
+
 export type PlayerGameInformation = { id: string; token: string; color: string }
 
