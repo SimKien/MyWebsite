@@ -19,7 +19,7 @@ pub struct SpecialMove {
 }
 
 //Communication structs to Frontend
-#[derive(Type, Serialize, Deserialize, Debug)]
+#[derive(Type, Serialize, Deserialize, Debug, Clone)]
 pub struct WebsocketMessage {
     pub message_type: String,
     pub from: String,
@@ -46,7 +46,7 @@ pub struct ValidMovesInformation {
     pub special_moves: Vec<SpecialMove>,
 }
 
-#[derive(Type, Serialize, Deserialize, Debug)]
+#[derive(Type, Serialize, Deserialize, Debug, Clone)]
 pub struct PlayerInformation {
     pub id: String,
     pub token: String,

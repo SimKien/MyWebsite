@@ -115,6 +115,7 @@ dependencies = [
  "comlib",
  "futures-util",
  "once_cell",
+ "rand",
  "serde",
  "serde_json",
  "specta",
