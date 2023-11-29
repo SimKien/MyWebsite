@@ -201,11 +201,16 @@ async fn handle_socket(
             if opponent_id == INVALID_ID {
                 continue;
             }
-            let opponent_client = locked_state.clients.get(&opponent_id).unwrap();
+            let opponent_client = locked_state.clients.get(&opponent_id).unwrap().clone();
 
             //TODO: Update board position and valid moves, aber zuerst boardposition setzen dass validmoves richtig funktioniert
 
             current_game.player_to_play = opponent_id.clone();
+
+            locked_state.games.remove(&current_player.current_game_id);
+            locked_state
+                .games
+                .insert(current_player.current_game_id, current_game);
 
             if opponent_client.send.send(msg).await.is_err() {
                 continue;
