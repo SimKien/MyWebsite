@@ -39,6 +39,8 @@ const INVALID_ID: Uuid = Uuid::nil();
 
 type SharedState = std::sync::Arc<tokio::sync::Mutex<AppState>>;
 
+const MESSAGE_TYPES: [&str; 2] = ["move", "ping"];
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PlayerQuery {
     player_id: String,
@@ -119,20 +121,13 @@ async fn handler(
     let player_id = player_information.player_id.clone();
     let player_uuid = Uuid::parse_str(&player_id).unwrap();
 
-    let mut locked_state = state.lock().await;
-
-    if !validate_player(
-        &player_information,
-        locked_state.players.get(&player_uuid).unwrap(),
-    ) {
-        ()
-    }
-
     let (sender, receiver) = tokio::sync::mpsc::channel(100);
 
     let client = Client {
         send: sender.clone(),
     };
+
+    let mut locked_state = state.lock().await;
 
     locked_state.clients.insert(player_uuid, client);
 
@@ -143,14 +138,32 @@ async fn handler(
 
     let cloned_state = state.clone();
 
-    ws.on_upgrade(|socket| handle_socket(socket, client_connection, cloned_state))
+    ws.on_upgrade(|socket| {
+        handle_socket(socket, client_connection, cloned_state, player_information)
+    })
 }
 
 async fn handle_socket(
     socket: WebSocket,
     mut client_connection: ClientConnection,
     state: std::sync::Arc<tokio::sync::Mutex<AppState>>,
+    player_information: PlayerQuery,
 ) {
+    {
+        let player_id = player_information.player_id.clone();
+        let player_uuid = Uuid::parse_str(&player_id).unwrap();
+
+        let mut locked_state = state.lock().await;
+
+        if !validate_player(
+            &player_information,
+            locked_state.players.get(&player_uuid).unwrap(),
+        ) {
+            locked_state.clients.remove(&player_uuid);
+            return;
+        }
+    }
+
     let (mut sender, mut receiver) = socket.split();
 
     tokio::spawn(async move {
@@ -173,6 +186,11 @@ async fn handle_socket(
                 return;
             };
             println!("Received from client: {:?}", msg);
+
+            if msg.message_type == MESSAGE_TYPES[1] {
+                continue;
+            }
+
             let mut locked_state = state.lock().await;
             let current_player = locked_state
                 .players
@@ -213,7 +231,7 @@ async fn handle_socket(
                 .insert(current_player.current_game_id, current_game);
 
             if opponent_client.send.send(msg).await.is_err() {
-                continue;
+                return;
             }
         }
     });
@@ -250,7 +268,9 @@ async fn get_board_position(
         &player_information,
         locked_state.players.get(&player_uuid).unwrap(),
     ) {
-        ()
+        return Json(BoardPositionInformation {
+            board_position: String::from(""),
+        });
     }
 
     let current_game_id = locked_state
@@ -283,7 +303,10 @@ async fn get_valid_moves(
         &player_information,
         locked_state.players.get(&player_uuid).unwrap(),
     ) {
-        ()
+        return Json(ValidMovesInformation {
+            valid_moves: HashMap::<String, Vec<String>>::new(),
+            special_moves: Vec::<SpecialMove>::new(),
+        });
     }
 
     let current_player = locked_state.players.get(&player_uuid).unwrap();
@@ -299,7 +322,7 @@ async fn get_valid_moves(
         });
     }
 
-    let valid_moves = calculate_valid_moves().await; //TODO: implement
+    let valid_moves = calculate_valid_moves();
 
     Json(valid_moves)
 }
@@ -317,7 +340,11 @@ async fn get_player_game(
         &player_information,
         locked_state.players.get(&player_uuid).unwrap(),
     ) {
-        ()
+        return Json(PlayerGameInformation {
+            id: player_information.player_id,
+            token: player_information.token,
+            color: String::from(""),
+        });
     }
 
     let mut current_player = locked_state.players.get(&player_uuid).unwrap().clone();

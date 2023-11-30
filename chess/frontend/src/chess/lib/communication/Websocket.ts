@@ -1,4 +1,5 @@
-import { WebsocketHandler } from "chess/lib/constants/WebsocketConstants";
+import { WebsocketHandler, WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
+import { WebsocketMessage } from "chess/lib/constants/CommunicationConstants";
 
 export class WebsocketCLient {
     connection!: WebSocket;
@@ -14,14 +15,27 @@ export class WebsocketCLient {
     connect(endpoint: string) {
         this.connection = new WebSocket(endpoint);
         this.connection.onerror = (error) => { console.log(error); setTimeout(() => this.reconnect(), 1000) };
+        let i: NodeJS.Timeout
         this.connection.onopen = () => {
             console.log("Websocket opened");
             this.drainBuffer();
+            i = setInterval(() => {
+                let ping: WebsocketMessage = {
+                    message_type: WebsocketTypes.PING,
+                    from: "",
+                    to: "",
+                    move_type: "",
+                    promotion_piece: ""
+                }
+                console.log("Sending ping");
+                this.send(JSON.stringify(ping))
+            }, 10000);
         };
         this.connection.onmessage = ((message) => {
             this.handlers.forEach(handler => handler(message.data as string))
         });
         this.connection.onclose = () => {
+            clearInterval(i);
             console.log("Websocket closed");
         };
     }

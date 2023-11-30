@@ -4,7 +4,7 @@ use comlib::ValidMovesInformation;
 
 use crate::{Game, Player, PlayerQuery};
 
-pub async fn calculate_valid_moves() -> ValidMovesInformation {
+pub fn calculate_valid_moves() -> ValidMovesInformation {
     //TODO man braucht die aktuelle Position und die Farbe des Spielers als Argumente
 
     let mut valid_moves_map: HashMap<String, Vec<String>> = HashMap::new();

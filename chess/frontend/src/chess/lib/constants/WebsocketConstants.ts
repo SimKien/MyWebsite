@@ -11,5 +11,6 @@ export const MoveTypes = {
 
 //types of websocket messages
 export const WebsocketTypes = {
-    MOVE: "move"
+    MOVE: "move",
+    PING: "ping",
 }
