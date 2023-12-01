@@ -221,6 +221,8 @@ async fn handle_socket(
             }
             let opponent_client = locked_state.clients.get(&opponent_id).unwrap().clone();
 
+            //TODO: check if the move made is really valid and if the player is the player to play
+
             //TODO: Update board position and valid moves, aber zuerst boardposition setzen dass validmoves richtig funktioniert
 
             current_game.player_to_play = opponent_id.clone();
@@ -231,16 +233,10 @@ async fn handle_socket(
                 .insert(current_player.current_game_id, current_game);
 
             if opponent_client.send.send(msg).await.is_err() {
-                return;
+                continue;
             }
         }
     });
-
-    //TODO: Was passiert wenn die websocket communication nach einer bestimmten zeit abbricht
-    //und ein gegner ein move macht welcher dann nicht mehr geliefert werden kann?
-    //Noch kann ein client nur eine websocket connection aufbauen wenn er am zug ist und
-    //dann merkt dass sie abgebrochen wurde, aber wenn man an ihn eine nachricht schicken möchte
-    //kann man die websocket connection noch nicht wieder aufbauen und die nachricht wird nicht zugestellt
 
     while let Some(msg) = client_connection.recv.recv().await {
         let msg = serde_json::to_string(&msg).unwrap();

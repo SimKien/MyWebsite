@@ -27,7 +27,6 @@ export class WebsocketCLient {
                     move_type: "",
                     promotion_piece: ""
                 }
-                console.log("Sending ping");
                 this.send(JSON.stringify(ping))
             }, 10000);
         };
