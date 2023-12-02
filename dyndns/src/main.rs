@@ -72,15 +72,16 @@ async fn main() {
             .map(|record| record.get("id").unwrap().to_string().replace("\"", ""));
         match record_id {
             Some(record_id) => {
-                println!("Update");
+                println!("Update record {}", update_request.record_name);
                 update(&zone_id, record_id, &update_request).await;
+                println!("Successfully updated record {}", update_request.record_name);
             }
             None => {
-                println!("Create");
+                println!("Create record {}", update_request.record_name);
                 create(&zone_id, &update_request).await;
+                println!("Successfully created record {}", update_request.record_name);
             }
         }
-        println!("Successfully updated record {}", update_request.record_name);
     }
     println!("Successfully updated all records");
 }
@@ -196,6 +197,7 @@ async fn fetch_ip(ip_type: &String) -> Option<String> {
         }
         let ip: Value = serde_json::from_str(&ip).unwrap();
         let ip = ip.get("ip").unwrap().to_string().replace("\"", "");
+        println!("{}", ip);
         return Some(ip);
     } else {
         let output = Command::new("curl").arg("https://4.myip.is/").output();
@@ -210,6 +212,7 @@ async fn fetch_ip(ip_type: &String) -> Option<String> {
         }
         let ip: Value = serde_json::from_str(&ip).unwrap();
         let ip = ip.get("ip").unwrap().to_string().replace("\"", "");
+        println!("{}", ip);
         return Some(ip);
     }
 }
