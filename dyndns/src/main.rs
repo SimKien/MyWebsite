@@ -198,7 +198,7 @@ async fn fetch_ip(ip_type: &String) -> Option<String> {
         }
         let ip: Value = serde_json::from_str(&ip).unwrap();
         let ip = ip.get("ip").unwrap().to_string().replace("\"", "");
-        println!("{}", ip);
+        println!("Fetched Ipv6-Adress: {}", ip);
         return Some(ip);
     } else {
         let output = Command::new("curl").arg("https://4.myip.is/").output();
@@ -213,7 +213,7 @@ async fn fetch_ip(ip_type: &String) -> Option<String> {
         }
         let ip: Value = serde_json::from_str(&ip).unwrap();
         let ip = ip.get("ip").unwrap().to_string().replace("\"", "");
-        println!("{}", ip);
+        println!("Fetched Ipv4-Adress: {}", ip);
         return Some(ip);
     }
 }
