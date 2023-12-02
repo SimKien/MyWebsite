@@ -22,9 +22,13 @@ struct UpdateRequest {
 
 #[tokio::main]
 async fn main() {
-    let config = match std::fs::read_to_string("config.json") {
+    let config_dir = std::env::var("DYNDNS_CONFIG").unwrap_or_else(|_| String::from("./"));
+    let config = match std::fs::read_to_string(format!("{}config.json", config_dir)) {
         Ok(x) => x,
-        Err(_) => return,
+        Err(_) => {
+            println!("Could not read config file");
+            return;
+        }
     };
 
     let update_requests: Vec<UpdateRequest> = serde_json::from_str(&config).unwrap();
