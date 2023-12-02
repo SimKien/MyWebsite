@@ -73,12 +73,12 @@ async fn main() {
             .map(|record| record.get("id").unwrap().to_string().replace("\"", ""));
         match record_id {
             Some(record_id) => {
-                println!("Update record {}", update_request.record_name);
+                println!("Update record {}....", update_request.record_name);
                 update(&zone_id, record_id, &update_request).await;
                 println!("Successfully updated record {}", update_request.record_name);
             }
             None => {
-                println!("Create record {}", update_request.record_name);
+                println!("Create record {}....", update_request.record_name);
                 create(&zone_id, &update_request).await;
                 println!("Successfully created record {}", update_request.record_name);
             }
