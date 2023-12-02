@@ -62,12 +62,13 @@ async fn main() {
         let record_id = &all_records
             .iter()
             .find(|x| {
-                x.get("type").unwrap().to_string().replace("\"", "") == update_request.record_type
-                    && x.get("name").unwrap().to_string().replace("\"", "")
+                (x.get("type").unwrap().to_string().replace("\"", "") == update_request.record_type)
+                    && (x.get("name").unwrap().to_string().replace("\"", "")
                         == format!("{}.{}", update_request.record_name, update_request.zone)
-                    || (x.get("name").unwrap().to_string().replace("\"", "") == update_request.zone
-                        && ((update_request.record_name == String::from("@"))
-                            || (update_request.record_name == update_request.zone)))
+                        || (x.get("name").unwrap().to_string().replace("\"", "")
+                            == update_request.zone
+                            && ((update_request.record_name == String::from("@"))
+                                || (update_request.record_name == update_request.zone))))
             })
             .map(|record| record.get("id").unwrap().to_string().replace("\"", ""));
         match record_id {
