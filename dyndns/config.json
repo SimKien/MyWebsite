@@ -1,0 +1,29 @@
+[
+    {
+        "zone": "simonkienle.de",
+        "record_name": "@",
+        "record_type": "AAAA",
+        "record_content": "",
+        "comment": "",
+        "record_ttl": 3600,
+        "proxied": true
+    },
+    {
+        "zone": "simonkienle.de",
+        "record_name": "test",
+        "record_type": "CNAME",
+        "record_content": "@",
+        "comment": "",
+        "record_ttl": 3600,
+        "proxied": true
+    },
+    {
+        "zone": "simonkienle.de",
+        "record_name": "simonkienle.de",
+        "record_type": "A",
+        "record_content": "",
+        "comment": "",
+        "record_ttl": 3600,
+        "proxied": true
+    }
+]
