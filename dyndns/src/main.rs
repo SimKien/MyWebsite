@@ -172,11 +172,16 @@ async fn update(zone_id: &String, record_id: &String, update_request: &UpdateReq
 
     if (new_record_json["content"].to_string()
         == current_record.get("content").unwrap().to_string())
-        && (new_record_json["name"].to_string() == current_record.get("name").unwrap().to_string())
         && (new_record_json["proxied"].to_string()
             == current_record.get("proxied").unwrap().to_string())
         && (new_record_json["type"].to_string() == current_record.get("type").unwrap().to_string())
-        && (new_record_json["ttl"].to_string() == current_record.get("ttl").unwrap().to_string())
+        && ((new_record_json["comment"].to_string()
+            == current_record.get("comment").unwrap().to_string())
+            || ((new_record_json["comment"].to_string().replace("\"", "") == String::from(""))
+                && (current_record.get("comment").unwrap().to_string() == Value::Null.to_string())))
+        && ((new_record_json["ttl"].as_u64().unwrap()
+            == current_record.get("ttl").unwrap().as_u64().unwrap())
+            || (new_record_json["proxied"].to_string() == String::from("true")))
     {
         println!("Record {} already up to date", update_request.record_name);
         return;
