@@ -161,6 +161,7 @@ async fn update(zone_id: &String, record_id: &String, update_request: &UpdateReq
         let ip = match fetch_ip(&update_request.record_type).await {
             Some(x) => x,
             None => {
+                println!("Could not fetch ip, skip updating record");
                 return;
             }
         };
