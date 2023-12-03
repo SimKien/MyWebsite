@@ -79,12 +79,10 @@ async fn main() {
             Some(record_id) => {
                 println!("Update record {}....", update_request.record_name);
                 update(&zone_id, record_id, &update_request).await;
-                println!("Successfully updated record {}", update_request.record_name);
             }
             None => {
                 println!("Create record {}....", update_request.record_name);
                 create(&zone_id, &update_request).await;
-                println!("Successfully created record {}", update_request.record_name);
             }
         }
     }
@@ -135,6 +133,7 @@ async fn create(zone_id: &String, update_request: &UpdateRequest) {
         .text()
         .await
         .unwrap();
+    println!("Successfully created record {}", update_request.record_name);
 }
 
 async fn update(zone_id: &String, record_id: &String, update_request: &UpdateRequest) {
@@ -170,6 +169,18 @@ async fn update(zone_id: &String, record_id: &String, update_request: &UpdateReq
         new_record_json["content"] = json!(update_request.record_content);
     };
 
+    if (new_record_json["content"].to_string()
+        == current_record.get("content").unwrap().to_string())
+        && (new_record_json["name"].to_string() == current_record.get("name").unwrap().to_string())
+        && (new_record_json["proxied"].to_string()
+            == current_record.get("proxied").unwrap().to_string())
+        && (new_record_json["type"].to_string() == current_record.get("type").unwrap().to_string())
+        && (new_record_json["ttl"].to_string() == current_record.get("ttl").unwrap().to_string())
+    {
+        println!("Record {} already up to date", update_request.record_name);
+        return;
+    }
+
     let new_record = serde_json::to_string(&new_record_json).unwrap();
     let client = Client::new();
     client
@@ -186,6 +197,7 @@ async fn update(zone_id: &String, record_id: &String, update_request: &UpdateReq
         .text()
         .await
         .unwrap();
+    println!("Successfully updated record {}", update_request.record_name);
 }
 
 async fn fetch_ip(ip_type: &String) -> Option<String> {
