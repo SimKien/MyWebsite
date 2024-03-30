@@ -2,11 +2,13 @@
     height: 90%;
     width: 90%;
     cursor: pointer;
+    opacity: 1;
 }
 
 .piececontainer {
     height: 100%;
     width: 100%;
+    opacity: 0.95;
     justify-content: center;
     align-items: center;
     display: flex;

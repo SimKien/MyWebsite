@@ -21,10 +21,6 @@ export default function Chess() {
         session.reportMove(move, specialMove);
     }
 
-    const receiveMove = (moveInfomationString: string) => {
-        session.receiveMove(moveInfomationString);
-    }
-
     const loadGame = async () => {
         if (!playerStore.valid) {
             await session.createPlayer();
@@ -44,7 +40,7 @@ export default function Chess() {
             }
         }
         await session.generateSession()
-        session.connection?.addHandler(receiveMove);
+        session.connection?.addHandler(session.receiveMove);
     }
 
     useEffect(() => {

@@ -2,7 +2,7 @@ import { MoveTypes, WebsocketTypes } from "chess/lib/constants/WebsocketConstant
 import { Move, PieceType } from "chess/lib/constants/ChessConstants"
 import { WebsocketMessage, SpecialMove } from "chess/lib/constants/CommunicationConstants"
 
-export const convertToMoveInformation = (move: Move, specialMove: SpecialMove | undefined) => {
+export const convertToMoveMessage = (move: Move, specialMove: SpecialMove | undefined) => {
     let moveInfo: WebsocketMessage = {
         message_type: WebsocketTypes.MOVE,
         from: move.fromAbsolute,
@@ -16,12 +16,12 @@ export const convertToMoveInformation = (move: Move, specialMove: SpecialMove | 
     return moveInfo
 }
 
-export const convertToMoves = (moveInformation: WebsocketMessage) => {
+export const convertToMove = (moveInformation: WebsocketMessage) => {
     let move: Move = {
         fromAbsolute: moveInformation.from,
         toAbsolute: moveInformation.to,
-        fromRelative: [-1, -1],                                     //set coordinates to undefined
-        toRelative: [-1, -1],
+        fromRelative: [-1, -1],                                     //set relative coordinates to undefined
+        toRelative: [-1, -1],                                       //set relative coordinates to undefined
         promotionPiece: moveInformation.promotion_piece as PieceType
     }
 

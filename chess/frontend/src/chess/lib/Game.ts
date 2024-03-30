@@ -5,7 +5,7 @@ import { Signal } from "@preact/signals-react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getIsValid, getNewPlayer, getValidMoves } from "chess/lib/communication/api";
-import { convertToMoveInformation, convertToMoves } from "chess/lib/communication/WSDataParser";
+import { convertToMoveMessage, convertToMove } from "chess/lib/communication/WSDataParser";
 import { WebsocketMessage, PlayerInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 const PLAYER_STORE_KEY = "player";
@@ -123,7 +123,7 @@ export class Session {
     }
 
     reportMove(move: Move, specialMove: SpecialMove | undefined) {
-        let moveInfo = convertToMoveInformation(move, specialMove)
+        let moveInfo = convertToMoveMessage(move, specialMove)
 
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
         this.connection?.send(moveInfo)
@@ -141,7 +141,7 @@ export class Session {
         }
         if (moveInformation.message_type !== WebsocketTypes.MOVE) return
 
-        const [move, specialMove] = convertToMoves(moveInformation)
+        const [move, specialMove] = convertToMove(moveInformation)
 
         this.makeMove(move, specialMove)
     }
