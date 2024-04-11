@@ -1,3 +1,4 @@
+/*
 import KingWhiteSVG from "assets/kingwhite.svg";
 import KingBlackSVG from "assets/kingblack.svg";
 import QueenWhiteSVG from "assets/queenwhite.svg";
@@ -38,3 +39,4 @@ export function PieceComponent(props: { piece: Piece }) {
         </div>
     );
 }
+*/

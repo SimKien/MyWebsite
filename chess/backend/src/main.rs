@@ -1,3 +1,5 @@
+//TODO: Change from player to user, for example in the query params names
+
 use std::{collections::HashMap, fs, time::Duration};
 
 use axum::{
@@ -10,7 +12,7 @@ use axum::{
     Json, Router,
 };
 use comlib::{
-    BoardPositionInformation, PlayerGameInformation, PlayerInformation, PlayerValid, SpecialMove,
+    BoardPositionInformation, PlayerGameInformation, UserInformation, UserValid, SpecialMove,
     ValidMovesInformation, WebsocketMessage,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -398,7 +400,7 @@ async fn get_player_game(
     Json(result)
 }
 
-async fn get_player(State(state): State<SharedState>) -> Json<PlayerInformation> {
+async fn get_player(State(state): State<SharedState>) -> Json<UserInformation> {
     const TOKEN_LENGTH: usize = 32;
 
     let player_id = Uuid::new_v4();
@@ -408,7 +410,7 @@ async fn get_player(State(state): State<SharedState>) -> Json<PlayerInformation>
         .map(char::from)
         .collect();
 
-    let player = PlayerInformation {
+    let player = UserInformation {
         id: player_id.to_string(),
         token: random_token.clone(),
     };
@@ -430,12 +432,12 @@ async fn get_player(State(state): State<SharedState>) -> Json<PlayerInformation>
 async fn is_player_valid(
     State(state): State<SharedState>,
     Query(player_information): Query<PlayerQuery>,
-) -> Json<PlayerValid> {
+) -> Json<UserValid> {
     let player_id = player_information.player_id.clone();
     let player_uuid_parse = Uuid::parse_str(&player_id);
 
     if player_uuid_parse.is_err() {
-        return Json(PlayerValid { valid: false });
+        return Json(UserValid { valid: false });
     }
 
     let player_uuid = player_uuid_parse.unwrap();
@@ -445,12 +447,12 @@ async fn is_player_valid(
     let player_get = locked_state.players.get(&player_uuid);
 
     if player_get.is_none() {
-        return Json(PlayerValid { valid: false });
+        return Json(UserValid { valid: false });
     }
 
     let player = player_get.unwrap();
 
-    let player_valid = PlayerValid {
+    let player_valid = UserValid {
         valid: validate_player(&player_information, player),
     };
 

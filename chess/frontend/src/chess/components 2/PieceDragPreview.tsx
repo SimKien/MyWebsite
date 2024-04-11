@@ -1,3 +1,4 @@
+/*
 import { Piece } from "chess/lib/constants/ChessConstants";
 import { CSSProperties } from "react";
 import { PIECE_MAP } from "./Piece";
@@ -12,3 +13,4 @@ export default function PieceDragPreview(props: { piece: Piece, style: CSSProper
         </div>
     )
 }
+*/

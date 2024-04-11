@@ -1,0 +1,1 @@
+export const Piece_dnd_type = "Piece"

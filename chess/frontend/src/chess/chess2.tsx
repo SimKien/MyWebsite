@@ -1,3 +1,4 @@
+/*
 import Board from "chess/components/Board";
 import "chess/style/Chess.css"
 import { signal } from "@preact/signals-react";
@@ -24,18 +25,18 @@ export default function Chess() {
     const loadGame = async () => {
         if (!playerStore.valid) {
             await session.createPlayer();
-            playerStore.setId(session.player.value.id);
-            playerStore.setToken(session.player.value.token);
+            playerStore.setId(session.user.value.id);
+            playerStore.setToken(session.user.value.token);
             playerStore.setValid(true);
         } else {
             player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token };
-            session.player.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token }
+            session.user.value = { color: Color.WHITE, id: playerStore.id, token: playerStore.token }
 
             let valid = await session.isPlayerValid()
             if (!valid) {
                 await session.createPlayer();
-                playerStore.setId(session.player.value.id);
-                playerStore.setToken(session.player.value.token);
+                playerStore.setId(session.user.value.id);
+                playerStore.setToken(session.user.value.token);
                 playerStore.setValid(true);
             }
         }
@@ -59,3 +60,4 @@ export default function Chess() {
         </div>
     );
 }
+*/

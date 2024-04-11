@@ -1,5 +1,6 @@
-import { MoveTypes, WebsocketTypes } from "chess/lib/constants/WebsocketConstants"
-import { Move, PieceType } from "chess/lib/constants/ChessConstants"
+import { WebsocketTypes } from "chess/lib/constants/WebsocketConstants"
+import { MoveTypes, Move } from "chess/lib/constants/BoardConstants"
+import { PieceType } from "chess/lib/constants/ChessConstants"
 import { WebsocketMessage, SpecialMove } from "chess/lib/constants/CommunicationConstants"
 
 export const convertToMoveMessage = (move: Move, specialMove: SpecialMove | undefined) => {

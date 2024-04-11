@@ -1,3 +1,4 @@
+/*
 import { useEffect, useRef } from "react";
 import "chess/style/Board.css";
 import { Color, PieceColor, Move, BoardSize, BoardOperations, PositionAbsolute } from "chess/lib/constants/ChessConstants"
@@ -70,3 +71,4 @@ export default function Board(props: {
         </div>
     );
 }
+*/

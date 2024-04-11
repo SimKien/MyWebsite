@@ -1,5 +1,5 @@
-import { Color, Move, PieceColor, PositionAbsolute, PositionRelative, colToLetter, letterToCol } from "chess/lib/constants/ChessConstants";
-import { MoveTypes } from "chess/lib/constants/WebsocketConstants";
+import { Color, PieceColor} from "chess/lib/constants/ChessConstants";
+import { MoveTypes, Move, PositionAbsolute, PositionRelative, colToLetter, letterToCol} from "chess/lib/constants/BoardConstants";
 import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 export function isWhiteSquare(rindex: number, cindex: number) {

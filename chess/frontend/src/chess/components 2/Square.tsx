@@ -1,3 +1,4 @@
+/*
 import { Signal } from "@preact/signals-react";
 import { Color, Move, Piece, PieceColor, PieceType, Piece_dnd_type, Piece_names, PositionAbsolute, PositionInfo, PositionRelative } from "chess/lib/constants/ChessConstants";
 import { useMemo, useRef, useState } from "react";
@@ -122,3 +123,4 @@ function DropableMarker(props: { isDropableArea: boolean, isOverOriginField: boo
             <></>
     );
 }
+*/

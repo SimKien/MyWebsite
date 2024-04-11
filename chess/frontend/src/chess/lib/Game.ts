@@ -1,58 +1,28 @@
-import { PieceColor, Color, Move, PositionAbsolute } from "chess/lib/constants/ChessConstants";
 import { WebsocketCLient as WebsocketClient } from "chess/lib/communication/Websocket";
 import { WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { BASE_URLS, ENDPOINTS, getBoardPosition, getGame, getIsValid, getNewPlayer, getValidMoves } from "chess/lib/communication/api";
+import { getBoardPosition, getGame, getWebsocketUrl, getValidMoves } from "chess/lib/communication/api";
 import { convertToMoveMessage, convertToMove } from "chess/lib/communication/WSDataParser";
-import { WebsocketMessage, PlayerInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
+import { WebsocketMessage, UserInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
+import { PieceColor } from "chess/lib/constants/ChessConstants";
+import { Move, PositionAbsolute} from "chess/lib/constants/BoardConstants";
+import { Player, User } from "chess/lib/constants/UserConstants";
 
-const PLAYER_STORE_KEY = "player";
-
-export interface Player {
-    color: PieceColor;
-    id: string;
-    token: string;
-}
-
-export interface PlayerMetaStore {
-    id: string;
-    token: string;
-    valid: boolean;
-    setId: (id: string) => void;
-    setToken: (token: string) => void;
-    setValid: (valid: boolean) => void;
-}
-
-export const usePlayerStore = create<PlayerMetaStore>()(
-    persist(
-        (set) => ({
-            id: "",
-            token: "",
-            valid: false,
-            setId: (id: string) => set({ id }),
-            setToken: (token: string) => set({ token }),
-            setValid: (valid: boolean) => set({ valid }),
-        }),
-        { name: PLAYER_STORE_KEY }
-    )
-);
-
-export class Session {
-    player: Signal<Player>;
-    connection: WebsocketClient | undefined;
+export class Game {
+    user: User;
+    player: Signal<Player>
+    connection!: WebsocketClient;
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
-    boardPosition: Signal<string>;
+    fetchedBoardPosition: Signal<string>;
     specialMoves: Signal<SpecialMove[]>;
-    makeMove: (move: Move, specialMove: SpecialMove | undefined) => void
+    makeMove: (move: Move, specialMove: SpecialMove | undefined) => void;
 
-    constructor(boardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>,
-        player: Signal<Player>, specialMoves: Signal<SpecialMove[]>) {
-        this.connection = undefined
-        this.player = player;
+    constructor(fetchedBoardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>, specialMoves: Signal<SpecialMove[]>,
+        user: User, player: Signal<Player>) {
+        this.user = user;
+        this.player = player
         this.validMoves = validMoves
-        this.boardPosition = boardPosition
+        this.fetchedBoardPosition = fetchedBoardPosition
         this.specialMoves = specialMoves
         this.makeMove = () => { }
     }
@@ -60,63 +30,47 @@ export class Session {
     async generateSession() {
         await Promise.all([this.createGame(), this.connectToWebsocket()])
 
-        this.connection?.addHandler(console.log)                                             //TODO: Evtl am Ende entfernen
+        this.connection.addHandler(console.log)                                                //TODO: Evtl am Ende entfernen
 
         await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
     }
 
     async connectToWebsocket() {
-        let playerInformation: PlayerInformation = {
-            id: this.player.value.id,
-            token: this.player.value.token
+        let userInformation: UserInformation = {
+            id: this.user.userId,
+            token: this.user.token
         }
-        this.connection = new WebsocketClient(BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?player_id=${playerInformation.id}&token=${playerInformation.token}`)
-    }
-
-    async isPlayerValid() {
-        let playerInformation: PlayerInformation = {
-            id: this.player.value.id,
-            token: this.player.value.token
-        }
-        let valid = false
-        await getIsValid(playerInformation).then((res) => { valid = res.valid })
-        return valid
+        this.connection = new WebsocketClient(getWebsocketUrl(userInformation))
     }
 
     async createGame() {
-        let playerInformation: PlayerInformation = {
-            id: this.player.value.id,
-            token: this.player.value.token
+        let userInformation: UserInformation = {
+            id: this.user.userId,
+            token: this.user.token
         }
-        await getGame(playerInformation).then((res) => {
-            let newPlayer = {
-                id: this.player.value.id,
-                token: this.player.value.token,
+        await getGame(userInformation).then((res) => {
+            let newPlayer: Player = {
+                user: this.user,                                                                //User wont change
                 color: res.color as PieceColor
             }
             this.player.value = newPlayer
         })
     }
 
-    async createPlayer() {
-        let playerInfo = await getNewPlayer();
-        this.player.value = { color: Color.WHITE, id: playerInfo.id, token: playerInfo.token }
-    }
-
     async fetchBoardPosition() {
-        let playerInformation: PlayerInformation = {
-            id: this.player.value.id,
-            token: this.player.value.token
+        let userInformation: UserInformation = {
+            id: this.user.userId,
+            token: this.user.token
         }
-        await getBoardPosition(playerInformation).then((res) => this.boardPosition.value = res.board_position)
+        await getBoardPosition(userInformation).then((res) => this.fetchedBoardPosition.value = res.board_position)
     }
 
     async fetchValidMoves() {
-        let playerInformation: PlayerInformation = {
-            id: this.player.value.id,
-            token: this.player.value.token
+        let userInformation: UserInformation = {
+            id: this.user.userId,
+            token: this.user.token
         }
-        await getValidMoves(playerInformation).then((data) => {
+        await getValidMoves(userInformation).then((data) => {
             this.validMoves.value = new Map<String, String[]>(Object.entries(data.valid_moves)) as Map<PositionAbsolute, PositionAbsolute[]>
             this.specialMoves.value = Array.from(data.special_moves)
         })
@@ -126,7 +80,7 @@ export class Session {
         let moveInfo = convertToMoveMessage(move, specialMove)
 
         this.validMoves.value = new Map<PositionAbsolute, PositionAbsolute[]>()         //theres no valid move when player just moved
-        this.connection?.send(moveInfo)
+        this.connection.send(moveInfo)
     }
 
     receiveMove(moveInformationString: string) {
@@ -144,5 +98,9 @@ export class Session {
         const [move, specialMove] = convertToMove(moveInformation)
 
         this.makeMove(move, specialMove)
+    }
+
+    setMakeMoveFunction(makeMove: (move: Move, specialMove: SpecialMove | undefined) => void) {
+        this.makeMove = makeMove
     }
 }

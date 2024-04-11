@@ -8,9 +8,9 @@ export type WebsocketMessage = { message_type: string; from: string; to: string;
 
 export type PlayerGameInformation = { id: string; token: string; color: string }
 
-export type PlayerValid = { valid: boolean }
+export type UserValid = { valid: boolean }
 
 export type SpecialMove = { from_absolute: string; to_absolute: string; special_type: string }
 
-export type PlayerInformation = { id: string; token: string }
+export type UserInformation = { id: string; token: string }
 

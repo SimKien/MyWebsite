@@ -1,3 +1,4 @@
+/*
 import "chess/style/PromotionSelection.css"
 import { PIECE_MAP } from "chess/components/Piece"
 import { PieceColor, PieceType, Piece_names } from "chess/lib/constants/ChessConstants";
@@ -26,3 +27,4 @@ export default function PromotionSelection(props: { color: PieceColor, reportSel
         </div>
     )
 }
+*/

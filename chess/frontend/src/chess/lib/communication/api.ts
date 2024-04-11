@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BoardPositionInformation, PlayerGameInformation, PlayerInformation, PlayerValid, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
+import { BoardPositionInformation, PlayerGameInformation, UserInformation, UserValid, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
 
 const HOSTNAME_DEV = "localhost:8080";
 const HOSTNAME_PROD = window.location.host;
@@ -16,21 +16,23 @@ export const BASE_URLS = import.meta.env.DEV
 
 export const ENDPOINTS = {
     GET_GAME: "/game",                      //Creates a new game or signals intend to join a game, gives id and token
-    GET_VALID_MOVES: "/valid-moves",        //Returns a map of valid moves, gives id and token of the player via query params
-    GET_BOARD_POSITION: "/board-position",  //Returns the current board position, gives id and token of the player via query params
-    GET_PLAYER: "/player",                  //Returns a new player
-    GET_IS_VALID: "/is-valid",              //Returns whether a player is valid, gives id and token of the player via query params
+    GET_VALID_MOVES: "/valid-moves",        //Returns a map of valid moves, gives id and token of the user via query params
+    GET_BOARD_POSITION: "/board-position",  //Returns the current board position, gives id and token of the user via query params
+    GET_PLAYER: "/user",                    //Returns a new user
+    GET_IS_VALID: "/is-valid",              //Returns whether a user is valid, gives id and token of the user via query params
     GET_WS: "/ws"                           //Returns a new websocket connection
 }
 
+export const getWebsocketUrl = (userInformation: UserInformation): string => BASE_URLS.WEBSOCKET + ENDPOINTS.GET_WS + `?user_id=${userInformation.id}&token=${userInformation.token}`
+
 export const AXIOS = axios.create({ baseURL: BASE_URLS.FETCH })
 
-export const getNewPlayer = (): Promise<PlayerInformation> => AXIOS.get(ENDPOINTS.GET_PLAYER).then((res) => res.data)
+export const getNewUser = (): Promise<UserInformation> => AXIOS.get(ENDPOINTS.GET_PLAYER).then((res) => res.data)
 
-export const getGame = (playerInformation: PlayerInformation): Promise<PlayerGameInformation> => AXIOS.get(ENDPOINTS.GET_GAME + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getGame = (userInformation: UserInformation): Promise<PlayerGameInformation> => AXIOS.get(ENDPOINTS.GET_GAME + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
 
-export const getBoardPosition = (playerInformation: PlayerInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getBoardPosition = (userInformation: UserInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
 
-export const getValidMoves = (playerInformation: PlayerInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getValidMoves = (userInformation: UserInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
 
-export const getIsValid = (playerInformation: PlayerInformation): Promise<PlayerValid> => AXIOS.get(ENDPOINTS.GET_IS_VALID + `?player_id=${playerInformation.id}&token=${playerInformation.token}`).then((res) => res.data)
+export const getIsValid = (userInformation: UserInformation): Promise<UserValid> => AXIOS.get(ENDPOINTS.GET_IS_VALID + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)

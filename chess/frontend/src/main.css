@@ -1,3 +1,10 @@
+/*
+:root {
+  color-scheme: light dark;                        maybe one day....  not well supported yet
+}
+*/
+
 body {
   margin: 0;
+/*  background-color: light-dark(white, black);     maybe one day....        */
 }

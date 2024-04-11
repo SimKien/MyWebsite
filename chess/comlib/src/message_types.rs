@@ -47,12 +47,12 @@ pub struct ValidMovesInformation {
 }
 
 #[derive(Type, Serialize, Deserialize, Debug, Clone)]
-pub struct PlayerInformation {
+pub struct UserInformation {
     pub id: String,
     pub token: String,
 }
 
 #[derive(Type, Serialize, Deserialize, Debug)]
-pub struct PlayerValid {
+pub struct UserValid {
     pub valid: bool,
 }
