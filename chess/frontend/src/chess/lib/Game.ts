@@ -1,7 +1,7 @@
 import { WebsocketCLient as WebsocketClient } from "chess/lib/communication/Websocket";
 import { WebsocketTypes } from "chess/lib/constants/WebsocketConstants";
 import { Signal } from "@preact/signals-react";
-import { getBoardPosition, getGame, getWebsocketUrl, getValidMoves } from "chess/lib/communication/api";
+import { getBoardPosition, getGame, getWebsocketUrl, getValidMoves, getDefaultBoard } from "chess/lib/communication/api";
 import { convertToMoveMessage, convertToMove } from "chess/lib/communication/WSDataParser";
 import { WebsocketMessage, UserInformation, SpecialMove } from "chess/lib/constants/CommunicationConstants";
 import { PieceColor } from "chess/lib/constants/ChessConstants";
@@ -15,7 +15,7 @@ export class Game {
     validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>;
     fetchedBoardPosition: Signal<string>;
     specialMoves: Signal<SpecialMove[]>;
-    makeMove: (move: Move, specialMove: SpecialMove | undefined) => void;
+    makeMove!: (move: Move, specialMove: SpecialMove | undefined) => void;
 
     constructor(fetchedBoardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>, specialMoves: Signal<SpecialMove[]>,
         user: User, player: Signal<Player>) {
@@ -24,10 +24,14 @@ export class Game {
         this.validMoves = validMoves
         this.fetchedBoardPosition = fetchedBoardPosition
         this.specialMoves = specialMoves
-        this.makeMove = () => { }
     }
 
-    async generateSession() {
+    async generateSession(makeMove: (move: Move, specialMove: SpecialMove | undefined) => void) {
+        this.makeMove = makeMove
+        if (!this.user.valid) {
+            await this.fetchDefaultBoardPosition()
+            return
+        }
         await Promise.all([this.createGame(), this.connectToWebsocket()])
 
         this.connection.addHandler(console.log)                                                //TODO: Evtl am Ende entfernen
@@ -41,6 +45,7 @@ export class Game {
             token: this.user.token
         }
         this.connection = new WebsocketClient(getWebsocketUrl(userInformation))
+        this.connection.addHandler(this.receiveMove)
     }
 
     async createGame() {
@@ -55,6 +60,10 @@ export class Game {
             }
             this.player.value = newPlayer
         })
+    }
+
+    async fetchDefaultBoardPosition() {
+        await getDefaultBoard().then((res) => this.fetchedBoardPosition.value = res.board_position)
     }
 
     async fetchBoardPosition() {
@@ -98,9 +107,5 @@ export class Game {
         const [move, specialMove] = convertToMove(moveInformation)
 
         this.makeMove(move, specialMove)
-    }
-
-    setMakeMoveFunction(makeMove: (move: Move, specialMove: SpecialMove | undefined) => void) {
-        this.makeMove = makeMove
     }
 }

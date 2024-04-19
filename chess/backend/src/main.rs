@@ -288,6 +288,12 @@ async fn get_board_position(
     Json(board_position)
 }
 
+async fn get_default_board() -> Json<BoardPositionInformation> {
+    Json(BoardPositionInformation {
+        board_position: String::from(DEFAULT_BOARD_POSITION),
+    })
+}
+
 async fn get_valid_moves(
     State(state): State<SharedState>,
     Query(player_information): Query<PlayerQuery>,
@@ -476,13 +482,14 @@ async fn main() {
 
     tokio::spawn(write_state_loop(state.clone()));
 
-    let port = std::env::var("CHESS_PORT").unwrap_or_else(|_| "8080".to_string());
+    let port = std::env::var("CHESS_PORT").unwrap_or_else(|_| "5173".to_string());
 
     let api = Router::new()
         .route("/ping", get(|| async { "pong" }))
         .route("/game", get(get_player_game))
         .route("/valid-moves", get(get_valid_moves))
         .route("/board-position", get(get_board_position))
+        .route("/default-board", get(get_default_board))
         .route("/player", get(get_player))
         .route("/is-valid", get(is_player_valid))
         .with_state(state.clone());

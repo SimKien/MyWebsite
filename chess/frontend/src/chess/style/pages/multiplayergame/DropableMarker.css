@@ -1,0 +1,20 @@
+.dropableMarker_withoutPiece {
+    width: 25%;
+    height: 25%;
+    background-color: darkgreen;
+}
+
+.dropableMarker_withPiece {
+    width: 100%;
+    height: 100%;
+    background-color: darkgreen;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropableMarker_withPiece_overlap {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}

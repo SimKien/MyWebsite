@@ -1,13 +1,22 @@
 import "chess/style/Navbar.css"
-import { setSelection } from "chess/components/Mainfield";
 import { FieldPages } from "chess/lib/FieldPages";
+import { currentSelection } from "chess/components/Mainfield";
+
+const currentOrigin = window.location.origin
 
 export default function Navbar() {
-    setSelection(FieldPages.Start);
+
+    // handlers
+    const selectionHandler = (page: FieldPages) => {
+        if (page === currentSelection) return
+        const newUrl = currentOrigin + "/" + page
+        window.open(newUrl, "_self")
+    }
 
     return (
         <div className="Navbar_main">
-            <p>Navbar</p>
+            <button className="Navbar_item" onClick={() => selectionHandler(FieldPages.Start)}>Home</button>
+            <button className="Navbar_item" onClick={() => selectionHandler(FieldPages.MultiplayerGame)}>Play</button>
         </div>
     );
 }

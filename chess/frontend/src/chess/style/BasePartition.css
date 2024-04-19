@@ -2,5 +2,5 @@
     width: 100vw;
     height: 100vh;
     display: grid;
-    grid-template-rows: minmax(32px, 1fr) 14fr;
+    grid-template-rows: minmax(2rem, 1fr) 14fr;
 }

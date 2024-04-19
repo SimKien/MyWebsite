@@ -1,8 +1,8 @@
 import { Color, PieceColor} from "chess/lib/constants/ChessConstants";
-import { MoveTypes, Move, PositionAbsolute, PositionRelative, colToLetter, letterToCol} from "chess/lib/constants/BoardConstants";
+import { MoveTypes, Move, PositionAbsolute, PositionRelative, colToLetter, letterToCol, BoardSize} from "chess/lib/constants/BoardConstants";
 import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
-export function isWhiteSquare(rindex: number, cindex: number) {
+export function isWhiteSquare(rindex: number, cindex: number): boolean {
     return (rindex + cindex) % 2 === 0;
 }
 
@@ -10,20 +10,20 @@ function isNumeric(str: string) {
     return /^\d+$/.test(str);
 }
 
-export function getRelativePosition(position: PositionAbsolute, size: number, boardOrientation: PieceColor): PositionRelative {
+export function getRelativePosition(position: PositionAbsolute, boardOrientation: PieceColor): PositionRelative {
     let positionSplit = position.split("");
     if (boardOrientation === Color.WHITE) {
-        return [size - parseInt(positionSplit[1]), letterToCol.get(positionSplit[0]) ?? 0];
+        return [BoardSize - parseInt(positionSplit[1]), letterToCol.get(positionSplit[0]) ?? 0];
     } else {
-        return [parseInt(positionSplit[1]) - 1, size - (letterToCol.get(positionSplit[0]) ?? 0) - 1];
+        return [parseInt(positionSplit[1]) - 1, BoardSize - (letterToCol.get(positionSplit[0]) ?? 0) - 1];
     }
 }
 
-export function getAbsolutePosition(position: PositionRelative, size: number, boardOrientation: PieceColor): PositionAbsolute {
+export function getAbsolutePosition(position: PositionRelative, boardOrientation: PieceColor): PositionAbsolute {
     if (boardOrientation === Color.WHITE) {
-        return ((colToLetter.get(position[1]) ?? "a") + (size - position[0]).toString());
+        return ((colToLetter.get(position[1]) ?? "a") + (BoardSize - position[0]).toString());
     } else {
-        return ((colToLetter.get(size - position[1] - 1) ?? "a") + (position[0] + 1).toString());
+        return ((colToLetter.get(BoardSize - position[1] - 1) ?? "a") + (position[0] + 1).toString());
     }
 }
 
@@ -39,7 +39,7 @@ export function movePiece(move: Move, board: string[][], specialMove: SpecialMov
         switch (specialMove.special_type) {
             case MoveTypes.CASTLING:
                 const rookTargetCol = (move.toRelative[1] + move.fromRelative[1]) / 2;
-                const rookSourceCol = move.toRelative[1] > move.fromRelative[1] ? 7 : 0;
+                const rookSourceCol = move.toRelative[1] > move.fromRelative[1] ? (BoardSize - 1) : 0;
                 result[move.toRelative[0]][rookTargetCol] = result[move.toRelative[0]][rookSourceCol];
                 result[move.fromRelative[0]][rookSourceCol] = "";
                 break;
@@ -57,22 +57,22 @@ export function movePiece(move: Move, board: string[][], specialMove: SpecialMov
     return result;
 }
 
-export function turnBoard(board: string[][], size: number) {
-    let result = new Array<Array<string>>(size);
-    for (let i: number = 0; i < size; i++) {
-        result[i] = new Array<string>(size);
-        for (let j: number = 0; j < size; j++) {
-            result[i][j] = board[size - 1 - i][size - 1 - j];
+export function turnBoard(board: string[][]) {
+    let result = new Array<Array<string>>(BoardSize);
+    for (let i: number = 0; i < BoardSize; i++) {
+        result[i] = new Array<string>(BoardSize);
+        for (let j: number = 0; j < BoardSize; j++) {
+            result[i][j] = board[BoardSize - 1 - i][BoardSize - 1 - j];
         }
     }
     return result;
 }
 
-export function loadPosition(boardPosition: string, size: number) {
-    let result = new Array<Array<string>>(size);
-    for (let i: number = 0; i < size; i++) {
-        result[i] = new Array<string>(size);
-        for (let j: number = 0; j < size; j++) {
+export function loadPosition(boardPosition: string) {
+    let result = new Array<Array<string>>(BoardSize);
+    for (let i: number = 0; i < BoardSize; i++) {
+        result[i] = new Array<string>(BoardSize);
+        for (let j: number = 0; j < BoardSize; j++) {
             result[i][j] = "";
         }
     }

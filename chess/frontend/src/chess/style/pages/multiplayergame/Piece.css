@@ -1,0 +1,14 @@
+.piece_main {
+    height: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateZ(0);                   /*  Used to fix chrome drag bug  */
+}
+
+.piece_svg {
+    height: 90%;
+    aspect-ratio: 1;
+    cursor: pointer;
+}

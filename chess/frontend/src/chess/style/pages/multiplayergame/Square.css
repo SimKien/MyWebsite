@@ -1,0 +1,25 @@
+.square_main {
+    height: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.white {
+    background-color: #f0d9b5;
+}
+
+.black {
+    background-color: #b58863;
+}
+
+.hoveredStyle {
+    background-color: darkgreen;
+    opacity: 0.4;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}

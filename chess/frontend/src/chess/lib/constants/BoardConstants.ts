@@ -1,4 +1,4 @@
-import { PieceColor, PieceType } from "chess/lib/constants/ChessConstants";
+import { Color, Piece_names, PieceColor, PieceType } from "chess/lib/constants/ChessConstants";
 import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 
 export type PositionRelative = [number, number];
@@ -28,11 +28,25 @@ export const letterToCol = new Map<string, number>([
     ["h", 7]
 ])
 
+export interface BoardInformation {
+    validMoves: Map<PositionAbsolute, PositionAbsolute[]>;
+    specialMoves: SpecialMove[];
+    orientation: PieceColor;
+    makeClientMove: (move: Move, specialMove: SpecialMove | undefined) => void;
+}
+
 export interface Piece {
     positionRelative: PositionRelative;
     positionAbsolute: PositionAbsolute;
     type: PieceType;
     color: PieceColor;
+}
+
+export const defaultPiece: Piece = {
+    positionRelative: [0, 0],
+    positionAbsolute: "a1",
+    type: Piece_names.Queen as PieceType,
+    color: Color.WHITE
 }
 
 export interface Move {

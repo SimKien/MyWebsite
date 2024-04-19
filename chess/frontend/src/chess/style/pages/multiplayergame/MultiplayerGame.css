@@ -1,0 +1,29 @@
+.multiplayergame_main {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    display: grid;
+    grid-template-rows: 2fr minmax(8rem, 14fr) 2fr;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    align-items: center;
+}
+
+.multiplayergame_header {
+    width: 100%;
+    height: 100%;
+    background-color: red;
+}
+
+.multiplayergame_footer {
+    width: 100%;
+    height: 100%;
+    background-color: blue;
+}
+
+.multiplayergame_body {
+    width: 100%;
+    height: 100%;
+    background-color: green;
+    display: flex;
+}
