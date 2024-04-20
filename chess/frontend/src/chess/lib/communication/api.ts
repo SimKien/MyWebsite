@@ -10,8 +10,8 @@ export const BASE_URLS = import.meta.env.DEV
         FETCH: `http://${HOSTNAME_DEV}/api`,
     }
     : {
-        WEBSOCKET: `ws://${HOSTNAME_PROD}`,                     //TODO: Ändern
-        FETCH: `http://${HOSTNAME_PROD}/api`,                   //TODO: Ändern
+        WEBSOCKET: `wss://${HOSTNAME_PROD}`,                     //TODO: Ändern
+        FETCH: `https://${HOSTNAME_PROD}/api`,                   //TODO: Ändern
     };
 
 export const ENDPOINTS = {
