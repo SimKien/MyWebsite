@@ -30,6 +30,7 @@ mod util;
 const FRONTEND_BASE_DIR: &str = "../frontend/dist";
 
 const DEFAULT_BOARD_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+//const EMPTY_BOARD_POSITION: &str = "8/8/8/8/8/8/8/8";
 
 const PLAYERS_FILE: &str = "players.json";
 

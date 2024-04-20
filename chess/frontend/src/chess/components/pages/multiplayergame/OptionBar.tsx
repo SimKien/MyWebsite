@@ -1,3 +1,5 @@
+import "chess/style/pages/multiplayergame/OptionBar.css"
+
 export default function OptionBar(props: {turnboardHandler: () => void}) {
     return (
         <div className="optionbar_main">

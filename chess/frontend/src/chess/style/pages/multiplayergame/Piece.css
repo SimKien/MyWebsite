@@ -1,6 +1,6 @@
 .piece_main {
+    width: 100%;
     height: 100%;
-    aspect-ratio: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +8,7 @@
 }
 
 .piece_svg {
+    width: 90%;
     height: 90%;
-    aspect-ratio: 1;
     cursor: pointer;
 }

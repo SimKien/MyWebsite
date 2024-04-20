@@ -1,15 +1,5 @@
 .board_main {
     height: 100%;
     aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.board_row {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
 }

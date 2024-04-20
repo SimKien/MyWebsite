@@ -6,5 +6,7 @@
 
 body {
   margin: 0;
+  border: 0;
+  padding: 0;
 /*  background-color: light-dark(white, black);     maybe one day....        */
 }
