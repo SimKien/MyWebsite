@@ -1,13 +1,13 @@
 .dropableMarker_withoutPiece {
     width: 25%;
     height: 25%;
-    background-color: darkgreen;
+    background-color: var(--square-board-dropable-color);
 }
 
 .dropableMarker_withPiece {
     width: 100%;
     height: 100%;
-    background-color: darkgreen;
+    background-color: var(--square-board-dropable-color);
     display: flex;
     align-items: center;
     justify-content: center;

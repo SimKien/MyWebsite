@@ -1,12 +1,20 @@
-/*
 :root {
-  color-scheme: light dark;                        maybe one day....  not well supported yet
+  --light-navbar-color: gray;
+  --dark-navbar-color: black;
+  --light-navbar-item-color: darkgray;
+  --dark-navbar-item-color: gray;
+  --light-navbar-border-color: whitesmoke;
+  --dark-navbar-border-color: gray;
+  --light-mainfield-color: white;
+  --dark-mainfield-color: darkgray;
+  --square-board-white-color: #f0d9b5;
+  --square-board-black-color: #b58863;
+  --square-board-hover-color: darkgreen;
+  --square-board-dropable-color: darkgreen;
 }
-*/
 
 body {
   margin: 0;
   border: 0;
   padding: 0;
-/*  background-color: light-dark(white, black);     maybe one day....        */
 }

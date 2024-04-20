@@ -4,14 +4,14 @@
 }
 
 .multiplayergame_header {
-    background-color: white;
+    background-color: var(--light-mainfield-color);
 }
 
 .multiplayergame_footer {
-    background-color: white;
+    background-color: var(--light-mainfield-color);
 }
 
 .multiplayergame_body {
-    background-color: white;
+    background-color: var(--light-mainfield-color);
     display: flex;
 }
