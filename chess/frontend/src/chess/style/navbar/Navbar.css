@@ -24,7 +24,8 @@
 }
 
 .navbar_item + .navbar_item {
-    border-left: 1px solid var(--light-navbar-border-color);
+    border-left: 1px solid;
+    border-color: var(--light-navbar-border-color);
 }
 
 .navbar_client_management > .navbar_item {

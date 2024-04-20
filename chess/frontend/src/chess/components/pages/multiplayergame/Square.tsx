@@ -10,7 +10,7 @@ import { useContext, useEffect, useMemo, useRef } from "react"
 import { useDrop } from "react-dnd"
 import { PieceComponent } from "chess/components/pages/multiplayergame/Piece"
 import PromotionSelection from "chess/components/pages/multiplayergame/PromotionSelection"
-import DropableMarker from "./DropableMarker"
+import DropableMarker from "chess/components/pages/multiplayergame/DropableMarker"
 
 export default function Square(props: {piece: string, positionRelative: PositionRelative}) {
     //context hooks
@@ -100,9 +100,7 @@ export default function Square(props: {piece: string, positionRelative: Position
                         <DropableMarker containsPiece={currentPiece.value !== undefined} isDropableArea={isDropableArea} isOverOriginField={isOverOriginField} squareColor={squareColor}>
                             <PieceComponent piece={currentPiece.value} />
                         </DropableMarker>
-                        {(isOver && !isOverOriginField) ? 
-                        <span className="hoveredStyle"></span>
-                        : <></>}
+                        {(isOver && !isOverOriginField) ? <span className="hoveredStyle"></span>: <></>}
                     </>
             }
         </div>
