@@ -1,0 +1,40 @@
+.navbar_main {
+    background-color: gray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar_client_management {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.navbar_page_selection {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.navbar_item {
+    cursor: pointer;
+    user-select: none;
+    padding: 5% 10%;
+}
+
+.navbar_item + .navbar_item {
+    border-left: 1px solid whitesmoke;
+}
+
+.navbar_client_management > .navbar_item {
+    color: darkgray;
+}
+
+.navbar_page_selection > .navbar_item {
+    color: darkgray;
+}
+
+.navbar_item > p {
+    margin: 0;
+}

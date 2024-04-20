@@ -1,7 +1,7 @@
 import { Signal } from "@preact/signals-react";
 import { User } from "chess/lib/constants/UserConstants";
 import { defaultUser } from "chess/lib/constants/ContextConstants";
-import { getNewUser } from "chess/lib/communication/api";
+import { getIsValid, getNewUser } from "chess/lib/communication/api";
 import { UserInformation } from "chess/lib/constants/CommunicationConstants";
 import { UserMetaStore } from "chess/lib/storage/UserStorage";
 
@@ -28,16 +28,17 @@ export class Session {
             token: this.user.value.token
         }
         let valid = false
-        userInformation                                                                     //TODO: remove later
-        //await getIsValid(userInformation).then((res) => { valid = res.valid })            //TODO: currently disabled, enable later
+        await getIsValid(userInformation).then((res) => { valid = res.valid })
         return valid
     }
 
-    async createUser() {
+    //login = get new user from server and set current user to new user
+    async logIn() {
         let userInfo = await getNewUser();
         this.user.value = { userId: userInfo.id, token: userInfo.token, valid: true }
 
         this.storeCurrentUser()
+        location.reload()
     }
 
     //logout = set current user to default user which is not valid
@@ -45,6 +46,7 @@ export class Session {
         this.user.value = defaultUser
 
         this.storeCurrentUser()
+        location.reload()
     }
 
     async storeCurrentUser() {

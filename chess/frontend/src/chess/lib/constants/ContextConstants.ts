@@ -3,6 +3,7 @@ import { Theme } from "chess/lib/constants/StyleConstants";
 import { BoardInformation, Move, PositionAbsolute } from "chess/lib/constants/BoardConstants";
 import { SpecialMove } from "chess/lib/constants/CommunicationConstants";
 import { Color } from "chess/lib/constants/ChessConstants";
+import { ClientManagement } from "chess/lib/constants/SessionConstants";
 
 export const defaultUser: User = {
     userId: "",
@@ -21,3 +22,9 @@ export const defaultBoardContext: BoardInformation = {
         console.log(specialMove);
     }
 };
+
+export const defaultClientManagement: ClientManagement = {
+    setTheme: () => {},
+    logIn: () => {},
+    logOut: () => {}
+}

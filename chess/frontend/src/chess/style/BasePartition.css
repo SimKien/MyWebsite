@@ -1,6 +1,7 @@
-.BasePartition_main {
+.basePartition_main {
     width: 100vw;
     height: 100vh;
     display: grid;
     grid-template-rows: minmax(2rem, 1fr) 14fr;
+    background-color: white;
 }

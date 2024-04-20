@@ -11,4 +11,5 @@
     width: 90%;
     height: 90%;
     cursor: pointer;
+    user-select: none;
 }
