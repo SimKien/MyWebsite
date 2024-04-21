@@ -43,7 +43,7 @@ export function PieceComponent(props: { piece: Piece | undefined }) {
             props.piece === undefined ?
                 <></>
             :
-                <div ref={drag} className="piece_main">
+                <div ref={drag} className="piece_main" id={props.piece.positionAbsolute}>
                     {isDragging ? PIECE_MAP[props.piece.type](props.piece.color, draggingOpacity) : PIECE_MAP[props.piece.type](props.piece.color, nonDraggingOpacity)}
                 </div>
             }
