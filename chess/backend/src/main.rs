@@ -1,6 +1,10 @@
-//TODO: Change from player to user, for example in the query params names
+mod util;
+mod storage;
 
-use std::{collections::HashMap, fs, time::Duration};
+use util::{calculate_valid_moves, get_player_color, validate_user};
+use storage::{import_games, import_open_game, import_players, import_users, write_state_loop};
+
+use std::collections::HashMap;
 
 use axum::{
     extract::{
@@ -22,33 +26,11 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::{error, warn};
-use util::{calculate_valid_moves, get_player_color, validate_player};
 use uuid::Uuid;
 
-mod util;
 
-const FRONTEND_BASE_DIR: &str = "../frontend/dist";
-
-const DEFAULT_BOARD_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-//const EMPTY_BOARD_POSITION: &str = "8/8/8/8/8/8/8/8";
-
-const PLAYERS_FILE: &str = "players.json";
-
-const GAMES_FILE: &str = "games.json";
-
-const OPEN_GAME_FILE: &str = "open_game.json";
-
-const INVALID_ID: Uuid = Uuid::nil();
-
+//tyoes
 type SharedState = std::sync::Arc<tokio::sync::Mutex<AppState>>;
-
-const MESSAGE_TYPES: [&str; 2] = ["move", "ping"];
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct PlayerQuery {
-    player_id: String,
-    token: String,
-}
 
 #[derive(Debug)]
 struct ClientConnection {
@@ -61,19 +43,22 @@ struct Client {
     send: Sender<WebsocketMessage>,
 }
 
-#[derive(Debug, Clone)]
-pub struct Player {
-    id: Uuid,
+#[derive(Deserialize, Serialize, Debug)]
+pub struct UserQuery {
+    user_id: String,
     token: String,
-    current_game_id: Uuid,
-    in_game: bool,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-struct PlayerFileStore {
-    id: String,
+#[derive(Debug, Clone)]
+pub struct User {
+    id: Uuid,
     token: String,
-    current_game_id: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct Player {
+    user: User,
+    current_game_id: Uuid,
     in_game: bool,
 }
 
@@ -86,22 +71,12 @@ pub struct Game {
     finished: bool,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-struct GameFileStore {
-    white_player: String,
-    black_player: String,
-    player_to_play: String,
-    board_position: String,
-    finished: bool,
-}
-
-type OpenGameFileStore = String;
-
 #[derive(Debug, Clone)]
 struct AppState {
     clients: HashMap<Uuid, Client>,
     games: HashMap<Uuid, Game>,
     open_game: Option<Uuid>,
+    users: HashMap<Uuid, User>,
     players: HashMap<Uuid, Player>,
 }
 
@@ -111,18 +86,34 @@ impl AppState {
             clients: HashMap::new(),
             games: HashMap::new(),
             open_game: None,
+            users: HashMap::new(),
             players: HashMap::new(),
         }
     }
 }
 
-async fn handler(
+
+//constants
+const MESSAGE_TYPES: [&str; 2] = ["move", "ping"];
+
+const FRONTEND_BASE_DIR: &str = "../frontend/dist";
+
+const COLOR_WHITE: &str = "white";
+const COLOR_BLACK: &str = "black";
+
+const DEFAULT_BOARD_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+
+const INVALID_ID: Uuid = Uuid::nil();
+
+
+
+async fn ws_handler(
     ws: WebSocketUpgrade,
-    Query(player_information): Query<PlayerQuery>,
+    Query(user_information): Query<UserQuery>,
     State(state): State<SharedState>,
 ) -> Response {
-    let player_id = player_information.player_id.clone();
-    let player_uuid = Uuid::parse_str(&player_id).unwrap();
+    let user_id = user_information.user_id.clone();
+    let user_uuid = Uuid::parse_str(&user_id).unwrap();
 
     let (sender, receiver) = tokio::sync::mpsc::channel(100);
 
@@ -132,17 +123,17 @@ async fn handler(
 
     let mut locked_state = state.lock().await;
 
-    locked_state.clients.insert(player_uuid, client);
+    locked_state.clients.insert(user_uuid, client);
 
     let client_connection = ClientConnection {
-        id: player_uuid.clone(),
+        id: user_uuid.clone(),
         recv: receiver,
     };
 
     let cloned_state = state.clone();
 
     ws.on_upgrade(|socket| {
-        handle_socket(socket, client_connection, cloned_state, player_information)
+        handle_socket(socket, client_connection, cloned_state, user_information)
     })
 }
 
@@ -150,19 +141,19 @@ async fn handle_socket(
     socket: WebSocket,
     mut client_connection: ClientConnection,
     state: std::sync::Arc<tokio::sync::Mutex<AppState>>,
-    player_information: PlayerQuery,
+    user_information: UserQuery,
 ) {
     {
-        let player_id = player_information.player_id.clone();
-        let player_uuid = Uuid::parse_str(&player_id).unwrap();
+        let user_id = user_information.user_id.clone();
+        let user_uuid = Uuid::parse_str(&user_id).unwrap();
 
         let mut locked_state = state.lock().await;
 
-        if !validate_player(
-            &player_information,
-            locked_state.players.get(&player_uuid).unwrap(),
+        if !validate_user(
+            &user_information,
+            locked_state.users.get(&user_uuid).unwrap(),
         ) {
-            locked_state.clients.remove(&player_uuid);
+            locked_state.clients.remove(&user_uuid);
             return;
         }
     }
@@ -256,16 +247,16 @@ async fn handle_socket(
 
 async fn get_board_position(
     State(state): State<SharedState>,
-    Query(player_information): Query<PlayerQuery>,
+    Query(user_information): Query<UserQuery>,
 ) -> Json<BoardPositionInformation> {
-    let player_id = player_information.player_id.clone();
-    let player_uuid = Uuid::parse_str(&player_id).unwrap();
+    let user_id = user_information.user_id.clone();
+    let user_uuid = Uuid::parse_str(&user_id).unwrap();
 
     let locked_state = state.lock().await;
 
-    if !validate_player(
-        &player_information,
-        locked_state.players.get(&player_uuid).unwrap(),
+    if !validate_user(
+        &user_information,
+        locked_state.users.get(&user_uuid).unwrap(),
     ) {
         return Json(BoardPositionInformation {
             board_position: String::from(""),
@@ -274,7 +265,7 @@ async fn get_board_position(
 
     let current_game_id = locked_state
         .players
-        .get(&player_uuid)
+        .get(&user_uuid)
         .unwrap()
         .current_game_id;
 
@@ -297,16 +288,16 @@ async fn get_default_board() -> Json<BoardPositionInformation> {
 
 async fn get_valid_moves(
     State(state): State<SharedState>,
-    Query(player_information): Query<PlayerQuery>,
+    Query(user_information): Query<UserQuery>,
 ) -> Json<ValidMovesInformation> {
-    let player_id = player_information.player_id.clone();
-    let player_uuid = Uuid::parse_str(&player_id).unwrap();
+    let user_id = user_information.user_id.clone();
+    let user_uuid = Uuid::parse_str(&user_id).unwrap();
 
     let locked_state = state.lock().await;
 
-    if !validate_player(
-        &player_information,
-        locked_state.players.get(&player_uuid).unwrap(),
+    if !validate_user(
+        &user_information,
+        locked_state.users.get(&user_uuid).unwrap(),
     ) {
         return Json(ValidMovesInformation {
             valid_moves: HashMap::<String, Vec<String>>::new(),
@@ -314,13 +305,13 @@ async fn get_valid_moves(
         });
     }
 
-    let current_player = locked_state.players.get(&player_uuid).unwrap();
+    let current_player = locked_state.players.get(&user_uuid).unwrap();
     let current_game = locked_state
         .games
         .get(&current_player.current_game_id)
         .unwrap();
 
-    if current_game.player_to_play != current_player.id {
+    if current_game.player_to_play != current_player.user.id {
         return Json(ValidMovesInformation {
             valid_moves: HashMap::<String, Vec<String>>::new(),
             special_moves: Vec::<SpecialMove>::new(),
@@ -332,27 +323,27 @@ async fn get_valid_moves(
     Json(valid_moves)
 }
 
-async fn get_player_game(
+async fn get_user_game(
     State(state): State<SharedState>,
-    Query(player_information): Query<PlayerQuery>,
+    Query(user_information): Query<UserQuery>,
 ) -> Json<PlayerGameInformation> {
-    let player_id = player_information.player_id.clone();
-    let player_uuid = Uuid::parse_str(&player_id).unwrap();
+    let user_id = user_information.user_id.clone();
+    let user_uuid = Uuid::parse_str(&user_id).unwrap();
 
     let mut locked_state = state.lock().await;
 
-    if !validate_player(
-        &player_information,
-        locked_state.players.get(&player_uuid).unwrap(),
+    if !validate_user(
+        &user_information,
+        locked_state.users.get(&user_uuid).unwrap(),
     ) {
         return Json(PlayerGameInformation {
-            id: player_information.player_id,
-            token: player_information.token,
+            id: user_information.user_id,
+            token: user_information.token,
             color: String::from(""),
         });
     }
 
-    let mut current_player = locked_state.players.get(&player_uuid).unwrap().clone();
+    let mut current_player = locked_state.players.get(&user_uuid).unwrap().clone();
 
     if current_player.in_game {
         let current_game = locked_state
@@ -361,8 +352,8 @@ async fn get_player_game(
             .unwrap();
         let color = get_player_color(&current_player, &current_game);
         return Json(PlayerGameInformation {
-            id: player_information.player_id,
-            token: player_information.token,
+            id: user_information.user_id,
+            token: user_information.token,
             color: color,
         });
     }
@@ -371,24 +362,24 @@ async fn get_player_game(
     let result = match game {
         Some(game_id) => {
             let mut game = locked_state.games.get(&game_id).unwrap().clone();
-            game.black_player = player_uuid;
+            game.black_player = user_uuid;
             locked_state.games.insert(game_id, game);
             locked_state.open_game = None;
             current_player.in_game = true;
             current_player.current_game_id = game_id.clone();
-            locked_state.players.insert(player_uuid, current_player);
+            locked_state.players.insert(user_uuid, current_player);
             PlayerGameInformation {
-                id: player_information.player_id,
-                token: player_information.token,
-                color: String::from("black"),
+                id: user_information.user_id,
+                token: user_information.token,
+                color: String::from(COLOR_BLACK),
             }
         }
         None => {
             let new_game_uuid = Uuid::new_v4();
             let game = Game {
-                white_player: player_uuid,
+                white_player: user_uuid,
                 black_player: INVALID_ID.clone(),
-                player_to_play: player_uuid,
+                player_to_play: user_uuid,
                 board_position: String::from(DEFAULT_BOARD_POSITION),
                 finished: false,
             };
@@ -396,74 +387,72 @@ async fn get_player_game(
             locked_state.open_game = Some(new_game_uuid);
             current_player.in_game = true;
             current_player.current_game_id = new_game_uuid.clone();
-            locked_state.players.insert(player_uuid, current_player);
+            locked_state.players.insert(user_uuid, current_player);
             PlayerGameInformation {
-                id: player_information.player_id,
-                token: player_information.token,
-                color: String::from("white"),
+                id: user_information.user_id,
+                token: user_information.token,
+                color: String::from(COLOR_WHITE),
             }
         }
     };
     Json(result)
 }
 
-async fn get_player(State(state): State<SharedState>) -> Json<UserInformation> {
+async fn get_new_user(State(state): State<SharedState>) -> Json<UserInformation> {
     const TOKEN_LENGTH: usize = 32;
 
-    let player_id = Uuid::new_v4();
+    let user_id = Uuid::new_v4();
     let random_token: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(TOKEN_LENGTH)
         .map(char::from)
         .collect();
 
-    let player = UserInformation {
-        id: player_id.to_string(),
+    let user = UserInformation {
+        id: user_id.to_string(),
         token: random_token.clone(),
     };
 
     let mut state = state.lock().await;
 
-    let new_player = Player {
-        id: player_id.clone(),
+    let new_user = User {
+        id: user_id.clone(),
         token: random_token.clone(),
-        current_game_id: INVALID_ID.clone(),
-        in_game: false,
     };
 
-    state.players.insert(player_id, new_player);
+    state.users.insert(user_id, new_user);
 
-    Json(player)
+    Json(user)
 }
 
-async fn is_player_valid(
+async fn is_user_valid(
     State(state): State<SharedState>,
-    Query(player_information): Query<PlayerQuery>,
+    Query(user_information): Query<UserQuery>,
 ) -> Json<UserValid> {
-    let player_id = player_information.player_id.clone();
-    let player_uuid_parse = Uuid::parse_str(&player_id);
+    let user_id = user_information.user_id.clone();
+    let user_uuid_parse = Uuid::parse_str(&user_id);
 
-    if player_uuid_parse.is_err() {
+    if user_uuid_parse.is_err() {
         return Json(UserValid { valid: false });
     }
 
-    let player_uuid = player_uuid_parse.unwrap();
+    let user_uuid = user_uuid_parse.unwrap();
 
     let locked_state = state.lock().await;
 
-    let player_get = locked_state.players.get(&player_uuid);
+    let user_get = locked_state.users.get(&user_uuid);
 
-    if player_get.is_none() {
+    if user_get.is_none() {
         return Json(UserValid { valid: false });
     }
 
-    let player = player_get.unwrap();
+    let user = user_get.unwrap();
 
-    let player_valid = UserValid {
-        valid: validate_player(&player_information, player),
+    let user_valid = UserValid {
+        valid: validate_user(&user_information, user),
     };
 
-    Json(player_valid)
+    Json(user_valid)
 }
 
 #[tokio::main]
@@ -473,11 +462,13 @@ async fn main() {
 
     {
         let mut locked_state = state.lock().await;
-        locked_state.players = import_players();
+        locked_state.users = import_users();
+        locked_state.players = import_players(&locked_state.users);
         locked_state.games = import_games();
         locked_state.open_game = import_open_game();
     }
 
+    println!("Users at start: {:?}", state.lock().await.users);
     println!("Players at start: {:?}", state.lock().await.players);
     println!("Games at start: {:?}", state.lock().await.games);
 
@@ -487,16 +478,16 @@ async fn main() {
 
     let api = Router::new()
         .route("/ping", get(|| async { "pong" }))
-        .route("/game", get(get_player_game))
+        .route("/game", get(get_user_game))
         .route("/valid-moves", get(get_valid_moves))
         .route("/board-position", get(get_board_position))
         .route("/default-board", get(get_default_board))
-        .route("/player", get(get_player))
-        .route("/is-valid", get(is_player_valid))
+        .route("/user", get(get_new_user))
+        .route("/is-valid", get(is_user_valid))
         .with_state(state.clone());
 
     let app = Router::new()
-        .route("/ws", get(handler))
+        .route("/ws", get(ws_handler))
         .nest("/api", api)
         .nest_service(
             "/",
@@ -513,132 +504,4 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>>) {
-    let mut interval = tokio::time::interval(Duration::from_millis(1000));
-    loop {
-        interval.tick().await;
-
-        let locked_state = state.lock().await;
-
-        let players = locked_state.players.clone();
-        let games = locked_state.games.clone();
-        let open_game = locked_state.open_game.clone();
-
-        let mut players_file_store: HashMap<String, PlayerFileStore> = HashMap::new();
-        let mut games_file_store: HashMap<String, GameFileStore> = HashMap::new();
-        let mut open_game_file_store: OpenGameFileStore = String::new();
-
-        for player in players {
-            let player_file_store = PlayerFileStore {
-                id: player.1.id.to_string(),
-                token: player.1.token,
-                current_game_id: player.1.current_game_id.to_string(),
-                in_game: player.1.in_game,
-            };
-            players_file_store.insert(player.0.to_string(), player_file_store);
-        }
-
-        for game in games {
-            let game_file_store = GameFileStore {
-                white_player: game.1.white_player.to_string(),
-                black_player: game.1.black_player.to_string(),
-                player_to_play: game.1.player_to_play.to_string(),
-                board_position: game.1.board_position,
-                finished: game.1.finished,
-            };
-            games_file_store.insert(game.0.to_string(), game_file_store);
-        }
-
-        if let Some(open_game) = open_game {
-            open_game_file_store = open_game.to_string();
-        }
-
-        fs::write(
-            PLAYERS_FILE,
-            serde_json::to_string_pretty(&players_file_store).unwrap(),
-        )
-        .unwrap();
-        fs::write(
-            GAMES_FILE,
-            serde_json::to_string_pretty(&games_file_store).unwrap(),
-        )
-        .unwrap();
-        fs::write(
-            OPEN_GAME_FILE,
-            serde_json::to_string_pretty(&open_game_file_store).unwrap(),
-        )
-        .unwrap();
-    }
-}
-
-fn import_players() -> HashMap<Uuid, Player> {
-    let unprocessed_players = fs::read_to_string(PLAYERS_FILE)
-        .ok()
-        .and_then(|players| serde_json::from_str::<HashMap<String, PlayerFileStore>>(&players).ok())
-        .unwrap_or_default();
-
-    if unprocessed_players.is_empty() {
-        return HashMap::new();
-    }
-
-    let mut players: HashMap<Uuid, Player> = HashMap::new();
-
-    for unprocessed_player in unprocessed_players {
-        let player_id = Uuid::parse_str(&unprocessed_player.0).unwrap();
-        let player_file_store = unprocessed_player.1;
-        let player = Player {
-            id: player_id,
-            token: player_file_store.token,
-            current_game_id: Uuid::parse_str(&player_file_store.current_game_id).unwrap(),
-            in_game: player_file_store.in_game,
-        };
-        players.insert(player_id, player);
-    }
-
-    return players;
-}
-
-fn import_games() -> HashMap<Uuid, Game> {
-    let unprocessed_games = fs::read_to_string(GAMES_FILE)
-        .ok()
-        .and_then(|games| serde_json::from_str::<HashMap<String, GameFileStore>>(&games).ok())
-        .unwrap_or_default();
-
-    if unprocessed_games.is_empty() {
-        return HashMap::new();
-    }
-
-    let mut games: HashMap<Uuid, Game> = HashMap::new();
-
-    for unprocessed_game in unprocessed_games {
-        let game_id = Uuid::parse_str(&unprocessed_game.0).unwrap();
-        let game_file_store = unprocessed_game.1;
-        let game: Game = Game {
-            white_player: Uuid::parse_str(&game_file_store.white_player).unwrap(),
-            black_player: Uuid::parse_str(&game_file_store.black_player).unwrap(),
-            player_to_play: Uuid::parse_str(&game_file_store.player_to_play).unwrap(),
-            board_position: game_file_store.board_position,
-            finished: game_file_store.finished,
-        };
-        games.insert(game_id, game);
-    }
-
-    return games;
-}
-
-fn import_open_game() -> Option<Uuid> {
-    let open_game = fs::read_to_string(OPEN_GAME_FILE)
-        .ok()
-        .and_then(|open_game| serde_json::from_str::<OpenGameFileStore>(&open_game).ok())
-        .unwrap_or_default();
-
-    if open_game.is_empty() {
-        return None;
-    }
-
-    let open_game_id = Uuid::parse_str(&open_game).unwrap();
-
-    return Some(open_game_id);
 }

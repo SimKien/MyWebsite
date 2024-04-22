@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use comlib::ValidMovesInformation;
 
-use crate::{Game, Player, PlayerQuery};
+use crate::{Game, Player, User, UserQuery, COLOR_BLACK, COLOR_WHITE};
 
 pub fn calculate_valid_moves() -> ValidMovesInformation {
     //TODO man braucht die aktuelle Position und die Farbe des Spielers als Argumente
@@ -17,16 +17,16 @@ pub fn calculate_valid_moves() -> ValidMovesInformation {
     }
 }
 
-pub fn validate_player(transfered_player: &PlayerQuery, actual_player: &Player) -> bool {
-    let actual_id_string = actual_player.id.to_string();
-    return transfered_player.player_id == actual_id_string
-        && transfered_player.token == actual_player.token;
+pub fn validate_user(transfered_user: &UserQuery, actual_user: &User) -> bool {
+    let actual_id_string = actual_user.id.to_string();
+    return transfered_user.user_id == actual_id_string
+        && transfered_user.token == actual_user.token;
 }
 
 pub fn get_player_color(player: &Player, game: &Game) -> String {
-    if game.white_player.to_string() == player.id.to_string() {
-        String::from("white")
+    if game.white_player.to_string() == player.user.id.to_string() {
+        String::from(COLOR_WHITE)
     } else {
-        String::from("black")
+        String::from(COLOR_BLACK)
     }
 }

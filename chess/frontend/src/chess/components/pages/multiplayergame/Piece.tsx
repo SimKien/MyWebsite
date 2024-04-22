@@ -14,7 +14,7 @@ import { Color, PieceColor } from "chess/lib/constants/ChessConstants";
 import { draggingOpacity, nonDraggingOpacity, PieceMap } from "chess/lib/constants/StyleConstants";
 import { Piece } from "chess/lib/constants/BoardConstants";
 import { useDrag } from "react-dnd";
-import { Piece_dnd_type } from "chess/lib/constants/DragnDropConstants";
+import { DraggedTag, NonDraggedTag, Piece_dnd_type } from "chess/lib/constants/DragnDropConstants";
 import "chess/style/pages/multiplayergame/Piece.css"
 
 export const PIECE_MAP: PieceMap = {
@@ -37,13 +37,15 @@ export function PieceComponent(props: { piece: Piece | undefined }) {
         })
     })
 
+    const draggedTag = isDragging ? DraggedTag : NonDraggedTag
+
     return (
         <>
             {
             props.piece === undefined ?
                 <></>
             :
-                <div ref={drag} className="piece_main" id={props.piece.positionAbsolute}>
+                <div ref={drag} className={`piece_main ${draggedTag}`}>
                     {isDragging ? PIECE_MAP[props.piece.type](props.piece.color, draggingOpacity) : PIECE_MAP[props.piece.type](props.piece.color, nonDraggingOpacity)}
                 </div>
             }

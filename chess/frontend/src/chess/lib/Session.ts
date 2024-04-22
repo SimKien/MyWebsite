@@ -1,6 +1,5 @@
 import { Signal } from "@preact/signals-react";
 import { User } from "chess/lib/constants/UserConstants";
-import { defaultUser } from "chess/lib/constants/ContextConstants";
 import { getIsValid, getNewUser } from "chess/lib/communication/api";
 import { UserInformation } from "chess/lib/constants/CommunicationConstants";
 import { UserMetaStore } from "chess/lib/storage/UserStorage";
@@ -32,18 +31,26 @@ export class Session {
         return valid
     }
 
-    //login = get new user from server and set current user to new user
+    //login = check current stored user und use this one or get new user from server and set current user to new user
     async logIn() {
-        let userInfo = await getNewUser();
-        this.user.value = { userId: userInfo.id, token: userInfo.token, valid: true }
+        if (this.user.value.valid) return
+
+        if (await this.isCurrentUserValid()) {                                              //if the user in store from earlier is already/still valid then no need to get a new user
+            this.user.value.valid = true
+        } else {
+            let userInfo = await getNewUser();
+            this.user.value = { userId: userInfo.id, token: userInfo.token, valid: true }
+        }
 
         this.storeCurrentUser()
         location.reload()
     }
 
-    //logout = set current user to default user which is not valid
+    //logout = set current user to not valid
     logOut() {
-        this.user.value = defaultUser
+        if (!this.user.value.valid) return
+
+        this.user.value.valid = false
 
         this.storeCurrentUser()
         location.reload()
@@ -56,17 +63,14 @@ export class Session {
     }
 
     async fetchStoredUser() {
-        if (!this.userStore.valid) {
-            if (await this.isCurrentUserValid()) {
-                this.user.value.valid = true
-            }
+        this.user.value = { userId: this.userStore.userId, token: this.userStore.token, valid: false }
+        
+        if (!this.userStore.valid) return                                                       //if valid is false in store then the user is logged out and stays logged out
+
+        if (await this.isCurrentUserValid()) {                                                  //if valid is true in store then check if the user is still valid and log in
+            this.user.value.valid = true
             return
         }
-
-        this.user.value = { userId: this.userStore.userId, token: this.userStore.token, valid: false }
-
-        if (await this.isCurrentUserValid()) {
-            this.user.value.valid = true
-        }
+        this.storeCurrentUser()                                                                  //if the user is not valid anymore then save logged out state
     }
 }
