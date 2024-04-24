@@ -63,7 +63,7 @@ export class Game {
             }
             this.player.value = newPlayer
         } catch (e) {
-            console.log(e)
+            
         }
     }
 
@@ -72,7 +72,7 @@ export class Game {
             let response = await getDefaultBoard(this.abortController)
             this.fetchedBoardPosition.value = response.data.board_position
         } catch (e) {
-            console.log(e)
+            
         }
     }
 
@@ -85,7 +85,7 @@ export class Game {
             let response = await getBoardPosition(userInformation, this.abortController)
             this.fetchedBoardPosition.value = response.data.board_position
         } catch (e) {
-            console.log(e)
+            
         }
     }
 
@@ -99,7 +99,7 @@ export class Game {
             this.validMoves.value = new Map<String, String[]>(Object.entries(response.data.valid_moves)) as Map<PositionAbsolute, PositionAbsolute[]>
             this.specialMoves.value = Array.from(response.data.special_moves)
         } catch (e) {
-            console.log(e)
+            
         }
     }
 

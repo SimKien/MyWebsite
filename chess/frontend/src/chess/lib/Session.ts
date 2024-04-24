@@ -34,7 +34,7 @@ export class Session {
             let response = await getIsValid(userInformation, this.abortController)
             valid = response.data.valid
         } catch (error) {
-            console.log(error)
+            
         }
         return valid
     }
@@ -50,7 +50,7 @@ export class Session {
                 let userInfo = await getNewUser(this.abortController);
                 this.user.value = { userId: userInfo.data.id, token: userInfo.data.token, valid: true }
             } catch (error) {
-                console.log(error)
+                
             }
         }
 
