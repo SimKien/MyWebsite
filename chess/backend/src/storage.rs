@@ -56,7 +56,7 @@ pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>
 
         for user in users {
             let user_file_store = UserFileStore {
-                id: user.1.id.to_string(),
+                id: user.1.user_id.to_string(),
                 token: user.1.token,
             };
             users_file_store.insert(user.0.to_string(), user_file_store);
@@ -64,7 +64,7 @@ pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>
 
         for player in players {
             let player_file_store = PlayerFileStore {
-                id: player.1.user.id.to_string(),
+                id: player.1.user.user_id.to_string(),
                 current_game_id: player.1.current_game_id.to_string(),
                 in_game: player.1.in_game,
             };
@@ -125,7 +125,7 @@ pub fn import_users() -> HashMap<Uuid, User> {
         let user_id = Uuid::parse_str(&unprocessed_user.0).unwrap();
         let user_file_store = unprocessed_user.1;
         let user = User {
-            id: user_id,
+            user_id,
             token: user_file_store.token,
         };
         users.insert(user_id, user);

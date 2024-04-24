@@ -51,7 +51,7 @@ pub struct UserQuery {
 
 #[derive(Debug, Clone)]
 pub struct User {
-    id: Uuid,
+    user_id: Uuid,
     token: String,
 }
 
@@ -311,7 +311,7 @@ async fn get_valid_moves(
         .get(&current_player.current_game_id)
         .unwrap();
 
-    if current_game.player_to_play != current_player.user.id {
+    if current_game.player_to_play != current_player.user.user_id {
         return Json(ValidMovesInformation {
             valid_moves: HashMap::<String, Vec<String>>::new(),
             special_moves: Vec::<SpecialMove>::new(),
@@ -343,7 +343,22 @@ async fn get_user_game(
         });
     }
 
-    let mut current_player = locked_state.players.get(&user_uuid).unwrap().clone();
+    let current_player_option = locked_state.players.get(&user_uuid);
+
+    let mut current_player = match current_player_option {
+        None => {
+            let new_player = Player {
+                user: locked_state.users.get(&user_uuid).unwrap().clone(),
+                current_game_id: INVALID_ID.clone(),
+                in_game: false,
+            };
+            locked_state.players.insert(user_uuid, new_player);
+            locked_state.players.get(&user_uuid).unwrap().clone()
+        }
+        Some(_) => {
+            current_player_option.unwrap().clone()
+        }
+    };
 
     if current_player.in_game {
         let current_game = locked_state
@@ -351,11 +366,14 @@ async fn get_user_game(
             .get(&current_player.current_game_id)
             .unwrap();
         let color = get_player_color(&current_player, &current_game);
-        return Json(PlayerGameInformation {
+
+        let res = PlayerGameInformation {
             id: user_information.user_id,
             token: user_information.token,
             color: color,
-        });
+        };
+
+        return Json(res);
     }
 
     let game = locked_state.open_game.clone();
@@ -416,7 +434,7 @@ async fn get_new_user(State(state): State<SharedState>) -> Json<UserInformation>
     let mut state = state.lock().await;
 
     let new_user = User {
-        id: user_id.clone(),
+        user_id: user_id.clone(),
         token: random_token.clone(),
     };
 
@@ -451,7 +469,7 @@ async fn is_user_valid(
     let user_valid = UserValid {
         valid: validate_user(&user_information, user),
     };
-
+    
     Json(user_valid)
 }
 

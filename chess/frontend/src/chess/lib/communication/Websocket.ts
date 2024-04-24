@@ -14,7 +14,6 @@ export class WebsocketCLient {
 
     connect(endpoint: string) {
         this.connection = new WebSocket(endpoint);
-        this.connection.onerror = (error) => { console.log(error); setTimeout(() => this.reconnect(), 1000) };
         let i: NodeJS.Timeout
         this.connection.onopen = () => {
             console.log("Websocket opened");
@@ -30,6 +29,7 @@ export class WebsocketCLient {
                 this.send(JSON.stringify(ping))
             }, 10000);
         };
+        this.connection.onerror = (error) => { console.log(error); clearInterval(i); setTimeout(() => this.reconnect(), 1000) };
         this.connection.onmessage = ((message) => {
             this.handlers.forEach(handler => handler(message.data as string))
         });

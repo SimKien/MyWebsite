@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { BoardPositionInformation, PlayerGameInformation, UserInformation, UserValid, ValidMovesInformation } from "chess/lib/constants/CommunicationConstants";
 
 const HOSTNAME_DEV = "localhost:5173";
@@ -28,14 +28,60 @@ export const getWebsocketUrl = (userInformation: UserInformation): string => BAS
 
 export const AXIOS = axios.create({ baseURL: BASE_URLS.FETCH })
 
-export const getNewUser = (): Promise<UserInformation> => AXIOS.get(ENDPOINTS.GET_PLAYER).then((res) => res.data)
+export const getNewUser = (abortController: AbortController): Promise<AxiosResponse<UserInformation>> => {
+    let config = {
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_PLAYER, config)
+}
 
-export const getGame = (userInformation: UserInformation): Promise<PlayerGameInformation> => AXIOS.get(ENDPOINTS.GET_GAME + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
+export const getGame = (userInformation: UserInformation, abortController: AbortController): Promise<AxiosResponse<PlayerGameInformation>> => {
+    let config = {
+        params: {
+            user_id: userInformation.id,
+            token: userInformation.token
+        },
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_GAME, config)
+}
 
-export const getBoardPosition = (userInformation: UserInformation): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_BOARD_POSITION + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
+export const getBoardPosition = (userInformation: UserInformation, abortController: AbortController): Promise<AxiosResponse<BoardPositionInformation>> => {
+    let config = {
+        params: {
+            user_id: userInformation.id,
+            token: userInformation.token
+        },
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_BOARD_POSITION, config)
+}
 
-export const getDefaultBoard = (): Promise<BoardPositionInformation> => AXIOS.get(ENDPOINTS.GET_DEFAULT_BOARD).then((res) => res.data)
+export const getDefaultBoard = (abortController: AbortController): Promise<AxiosResponse<BoardPositionInformation>> => {
+    let config = {
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_DEFAULT_BOARD, config)
+}
 
-export const getValidMoves = (userInformation: UserInformation): Promise<ValidMovesInformation> => AXIOS.get(ENDPOINTS.GET_VALID_MOVES + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
+export const getValidMoves = (userInformation: UserInformation, abortController: AbortController): Promise<AxiosResponse<ValidMovesInformation>> => {
+    let config = {
+        params: {
+            user_id: userInformation.id,
+            token: userInformation.token
+        },
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_VALID_MOVES, config)
+}
 
-export const getIsValid = (userInformation: UserInformation): Promise<UserValid> => AXIOS.get(ENDPOINTS.GET_IS_VALID + `?user_id=${userInformation.id}&token=${userInformation.token}`).then((res) => res.data)
+export const getIsValid = (userInformation: UserInformation, abortController: AbortController): Promise<AxiosResponse<UserValid>> => {
+    let config = {
+        params: {
+            user_id: userInformation.id,
+            token: userInformation.token
+        },
+        signal: abortController.signal
+    }
+    return AXIOS.get(ENDPOINTS.GET_IS_VALID, config)
+}

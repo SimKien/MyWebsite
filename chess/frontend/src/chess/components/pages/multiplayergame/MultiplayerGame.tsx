@@ -6,7 +6,7 @@ import { Player } from "chess/lib/constants/UserConstants";
 import { UserContext } from "chess/lib/contexts/UserContext";
 import { Game } from "chess/lib/Game";
 import { getRelativePosition, loadPosition, movePiece, turnBoard } from "chess/lib/utility/BoardOperations";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import Board from "chess/components/pages/multiplayergame/Board";
 import "chess/style/pages/multiplayergame/MultiplayerGame.css";
 import { defaultBoardContext } from "chess/lib/constants/ContextConstants";
@@ -26,7 +26,16 @@ export default function MultiplayerGame() {
     const board = useSignal<string[][]>(new Array(BoardSize).fill(new Array(BoardSize).fill("")))
     const orientation = useSignal<PieceColor>(Color.WHITE)
     const boardContext = useSignal<BoardInformation>(defaultBoardContext)
-    const game = new Game(fetchedBoardPosition, validMoves, specialMoves, userContext, player)
+
+    const gameRef = useRef<Game | undefined>(undefined)                                         //initial to undefined so it is not recreated every time the component rerenders
+    function getGame() {                                                                        //avoid undefined checks because of useRef is never undefined
+        if (gameRef.current !== undefined) {
+            return gameRef.current
+        }
+        const game = new Game(fetchedBoardPosition, validMoves, specialMoves, userContext, player)
+        gameRef.current = game
+        return game
+    }
     
     // handlers
     const turnBoardHandler = () => {
@@ -36,7 +45,7 @@ export default function MultiplayerGame() {
 
     const makeClientMove = (move: Move, specialMove: SpecialMove | undefined) => {
         board.value = movePiece(move, board.value, specialMove);
-        game.reportMove(move, specialMove);
+        getGame().reportMove(move, specialMove);
     }
 
     const makeServerMove = (move: Move, specialMove: SpecialMove | undefined) => {
@@ -48,8 +57,14 @@ export default function MultiplayerGame() {
 
     // react hooks
     useEffect(() => {
-        void game.generateSession(makeServerMove)
+        return () => {getGame().closeGame()}                                                    //close the game when the component unmounts
     }, [])
+
+    useEffect(() => {
+        getGame().closeGame()
+        gameRef.current = new Game(fetchedBoardPosition, validMoves, specialMoves, userContext, player)
+        void getGame().generateSession(makeServerMove)
+    }, [userContext.userId, userContext.valid])
 
     useSignalEffect(() => {
         board.value = loadPosition(fetchedBoardPosition.value)

@@ -16,6 +16,7 @@ export class Game {
     fetchedBoardPosition: Signal<string>;
     specialMoves: Signal<SpecialMove[]>;
     makeMove!: (move: Move, specialMove: SpecialMove | undefined) => void;
+    abortController: AbortController;
 
     constructor(fetchedBoardPosition: Signal<string>, validMoves: Signal<Map<PositionAbsolute, PositionAbsolute[]>>, specialMoves: Signal<SpecialMove[]>,
         user: User, player: Signal<Player>) {
@@ -24,6 +25,7 @@ export class Game {
         this.validMoves = validMoves
         this.fetchedBoardPosition = fetchedBoardPosition
         this.specialMoves = specialMoves
+        this.abortController = new AbortController()
     }
 
     async generateSession(makeMove: (move: Move, specialMove: SpecialMove | undefined) => void) {
@@ -34,7 +36,7 @@ export class Game {
         }
         await Promise.all([this.createGame(), this.connectToWebsocket()])
 
-        this.connection.addHandler(console.log)                                                //TODO: Evtl am Ende entfernen
+        this.connection.addHandler(console.log)                                                 //TODO: Evtl am Ende entfernen
 
         await Promise.all([this.fetchBoardPosition(), this.fetchValidMoves()])
     }
@@ -53,17 +55,25 @@ export class Game {
             id: this.user.userId,
             token: this.user.token
         }
-        await getGame(userInformation).then((res) => {
+        try {
+            let response = await getGame(userInformation, this.abortController)
             let newPlayer: Player = {
-                user: this.user,                                                                //User wont change
-                color: res.color as PieceColor
+                user: this.user,                                                                //User wont change in this game instance
+                color: response.data.color as PieceColor
             }
             this.player.value = newPlayer
-        })
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async fetchDefaultBoardPosition() {
-        await getDefaultBoard().then((res) => this.fetchedBoardPosition.value = res.board_position)
+        try {
+            let response = await getDefaultBoard(this.abortController)
+            this.fetchedBoardPosition.value = response.data.board_position
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async fetchBoardPosition() {
@@ -71,7 +81,12 @@ export class Game {
             id: this.user.userId,
             token: this.user.token
         }
-        await getBoardPosition(userInformation).then((res) => this.fetchedBoardPosition.value = res.board_position)
+        try {
+            let response = await getBoardPosition(userInformation, this.abortController)
+            this.fetchedBoardPosition.value = response.data.board_position
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async fetchValidMoves() {
@@ -79,10 +94,13 @@ export class Game {
             id: this.user.userId,
             token: this.user.token
         }
-        await getValidMoves(userInformation).then((data) => {
-            this.validMoves.value = new Map<String, String[]>(Object.entries(data.valid_moves)) as Map<PositionAbsolute, PositionAbsolute[]>
-            this.specialMoves.value = Array.from(data.special_moves)
-        })
+        try {
+            let response = await getValidMoves(userInformation, this.abortController)
+            this.validMoves.value = new Map<String, String[]>(Object.entries(response.data.valid_moves)) as Map<PositionAbsolute, PositionAbsolute[]>
+            this.specialMoves.value = Array.from(response.data.special_moves)
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     reportMove(move: Move, specialMove: SpecialMove | undefined) {
@@ -107,5 +125,9 @@ export class Game {
         const [move, specialMove] = convertToMove(moveInformation)
 
         this.makeMove(move, specialMove)
+    }
+
+    closeGame() {
+        this.abortController.abort()
     }
 }
