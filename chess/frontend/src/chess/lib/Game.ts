@@ -111,8 +111,6 @@ export class Game {
     }
 
     receiveMove(moveInformationString: string) {
-        void this.fetchValidMoves()
-
         let moveInformation: WebsocketMessage
         try {
             moveInformation = JSON.parse(moveInformationString)
@@ -121,10 +119,12 @@ export class Game {
             return
         }
         if (moveInformation.message_type !== WebsocketTypes.MOVE) return
-
+        
         const [move, specialMove] = convertToMove(moveInformation)
-
+        
         this.makeMove(move, specialMove)
+
+        void this.fetchValidMoves()                                                      //fetch new valid moves after update board so that client cant make an invalid move
     }
 
     closeGame() {

@@ -1,9 +1,10 @@
-use std::{collections::HashMap, fs, time::Duration};
+use std::{collections::HashMap, fs, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
-use crate::{AppState, Game, Player, User};
+use crate::{state::AppState, Game, PendingGame, Player, User};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct UserFileStore {
@@ -27,7 +28,7 @@ struct GameFileStore {
     finished: bool,
 }
 
-type OpenGameFileStore = String;
+type PendingGameFileStore = String;
 
 const USER_FILE: &str = "users.json";
 
@@ -35,9 +36,9 @@ const PLAYERS_FILE: &str = "players.json";
 
 const GAMES_FILE: &str = "games.json";
 
-const OPEN_GAME_FILE: &str = "open_game.json";
+const PENDING_GAME_FILE: &str = "pending_game.json";
 
-pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>>) {
+pub async fn write_state_loop(state: Arc<Mutex<AppState>>) {
     let mut interval = tokio::time::interval(Duration::from_millis(1000));
     loop {
         interval.tick().await;
@@ -47,12 +48,12 @@ pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>
         let users = locked_state.users.clone();
         let players = locked_state.players.clone();
         let games = locked_state.games.clone();
-        let open_game = locked_state.open_game.clone();
+        let pending_game = locked_state.pending_game.clone();
 
         let mut users_file_store: HashMap<String, UserFileStore> = HashMap::new();
         let mut players_file_store: HashMap<String, PlayerFileStore> = HashMap::new();
         let mut games_file_store: HashMap<String, GameFileStore> = HashMap::new();
-        let mut open_game_file_store: OpenGameFileStore = String::new();
+        let mut pending_game_file_store: PendingGameFileStore = String::new();
 
         for user in users {
             let user_file_store = UserFileStore {
@@ -82,8 +83,8 @@ pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>
             games_file_store.insert(game.0.to_string(), game_file_store);
         }
 
-        if let Some(open_game) = open_game {
-            open_game_file_store = open_game.to_string();
+        if let Some(pending_game) = pending_game.game {
+            pending_game_file_store = pending_game.to_string();
         }
 
         fs::write(
@@ -102,8 +103,8 @@ pub async fn write_state_loop(state: std::sync::Arc<tokio::sync::Mutex<AppState>
         )
         .unwrap();
         fs::write(
-            OPEN_GAME_FILE,
-            serde_json::to_string_pretty(&open_game_file_store).unwrap(),
+            PENDING_GAME_FILE,
+            serde_json::to_string_pretty(&pending_game_file_store).unwrap(),
         )
         .unwrap();
     }
@@ -189,17 +190,17 @@ pub fn import_games() -> HashMap<Uuid, Game> {
     return games;
 }
 
-pub fn import_open_game() -> Option<Uuid> {
-    let open_game = fs::read_to_string(OPEN_GAME_FILE)
+pub fn import_pending_game() -> PendingGame {
+    let pending_game = fs::read_to_string(PENDING_GAME_FILE)
         .ok()
-        .and_then(|open_game| serde_json::from_str::<OpenGameFileStore>(&open_game).ok())
+        .and_then(|pending_game| serde_json::from_str::<PendingGameFileStore>(&pending_game).ok())
         .unwrap_or_default();
 
-    if open_game.is_empty() {
-        return None;
+    if pending_game.is_empty() {
+        return PendingGame::new();
     }
 
-    let open_game_id = Uuid::parse_str(&open_game).unwrap();
+    let pending_game_id = Uuid::parse_str(&pending_game).unwrap();
 
-    return Some(open_game_id);
+    return PendingGame::new_with_game(pending_game_id);
 }
