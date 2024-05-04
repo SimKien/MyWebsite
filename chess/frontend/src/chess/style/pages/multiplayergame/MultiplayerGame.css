@@ -15,3 +15,9 @@
     background-color: var(--light-mainfield-color);
     display: flex;
 }
+
+@media (orientation: portrait) {
+    .multiplayergame_body {
+        flex-direction: column;
+    }
+}
