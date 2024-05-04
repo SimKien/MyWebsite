@@ -1,6 +1,6 @@
 mod storage;
-mod util;
 mod state;
+mod utils;
 mod routes;
 
 use std::sync::Arc;
@@ -75,7 +75,7 @@ pub struct Game {
     white_player: Uuid,
     black_player: Uuid,
     player_to_play: Uuid,
-    board_position: String,
+    fen: String,
     finished: bool,
 }
 
@@ -85,7 +85,7 @@ impl Game {
             white_player: white,
             black_player: black,
             player_to_play: white,
-            board_position: String::from(DEFAULT_BOARD_POSITION),
+            fen: String::from(DEFAULT_FEN),
             finished: false,
         }
     }
@@ -137,11 +137,10 @@ pub const COLOR_WHITE: &str = "white";
 pub const COLOR_BLACK: &str = "black";
 
 pub const DEFAULT_BOARD_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 pub const INVALID_ID: Uuid = Uuid::nil();
 pub const TOKEN_LENGTH: usize = 32;
-
-pub const BOARD_SIZE: usize = 8;
 
 
 //TODO: man könnte überlegen, clients zu löschen wenn die websocket communication abbricht, für Skalierbarkeit

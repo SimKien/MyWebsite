@@ -2,7 +2,7 @@ use axum::{extract::{Query, State}, Json};
 use comlib::BoardPositionInformation;
 use uuid::Uuid;
 
-use crate::{state::SharedState, util::validate_user, UserQuery, DEFAULT_BOARD_POSITION};
+use crate::{state::SharedState, utils::{validate_user, get_board_position_from_fen}, UserQuery, DEFAULT_BOARD_POSITION};
 
 /*
 gives the current board position of the user´s current game
@@ -18,7 +18,7 @@ pub async fn get_board_position(
 
     if !validate_user(
         &user_information,
-        locked_state.users.get(&user_uuid).unwrap(),
+        locked_state.users.get(&user_uuid),
     ) {
         return Json(BoardPositionInformation {
             board_position: String::from(""),
@@ -31,13 +31,11 @@ pub async fn get_board_position(
         .unwrap()
         .current_game_id;
 
+    let current_game = locked_state.games.get(&current_game_id).unwrap().clone();
+    let board_position = get_board_position_from_fen(&current_game.fen);
+
     let board_position = BoardPositionInformation {
-        board_position: locked_state
-            .games
-            .get(&current_game_id)
-            .unwrap()
-            .board_position
-            .clone(),
+        board_position: board_position
     };
     Json(board_position)
 }

@@ -24,7 +24,7 @@ struct GameFileStore {
     white_player: String,
     black_player: String,
     player_to_play: String,
-    board_position: String,
+    fen: String,
     finished: bool,
 }
 
@@ -77,7 +77,7 @@ pub async fn write_state_loop(state: Arc<Mutex<AppState>>) {
                 white_player: game.1.white_player.to_string(),
                 black_player: game.1.black_player.to_string(),
                 player_to_play: game.1.player_to_play.to_string(),
-                board_position: game.1.board_position,
+                fen: game.1.fen,
                 finished: game.1.finished,
             };
             games_file_store.insert(game.0.to_string(), game_file_store);
@@ -181,7 +181,7 @@ pub fn import_games() -> HashMap<Uuid, Game> {
             white_player: Uuid::parse_str(&game_file_store.white_player).unwrap(),
             black_player: Uuid::parse_str(&game_file_store.black_player).unwrap(),
             player_to_play: Uuid::parse_str(&game_file_store.player_to_play).unwrap(),
-            board_position: game_file_store.board_position,
+            fen: game_file_store.fen,
             finished: game_file_store.finished,
         };
         games.insert(game_id, game);

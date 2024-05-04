@@ -4,7 +4,7 @@ use futures_util::{SinkExt, StreamExt};
 use tracing::{error, warn};
 use uuid::Uuid;
 
-use crate::{state::{AppState, SharedState}, util::{get_player_color, validate_user}, Client, ClientConnection, UserQuery, INVALID_ID, MESSAGE_TYPES};
+use crate::{state::{AppState, SharedState}, utils::{get_player_color, validate_user}, Client, ClientConnection, UserQuery, INVALID_ID, MESSAGE_TYPES};
 
 
 pub async fn ws_handler(
@@ -49,7 +49,7 @@ async fn handle_socket(
 
         if !validate_user(
             &user_information,
-            locked_state.users.get(&user_uuid).unwrap(),
+            locked_state.users.get(&user_uuid),
         ) {
             locked_state.clients.remove(&user_uuid);
             return;

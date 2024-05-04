@@ -2,7 +2,7 @@ use axum::{extract::{Query, State}, Json};
 use comlib::UserValid;
 use uuid::Uuid;
 
-use crate::{state::SharedState, util::validate_user, UserQuery};
+use crate::{state::SharedState, utils::validate_user, UserQuery};
 
 /*
 Checks if the user is valid by checking if the user_id and token are in the state.users hashmap
@@ -22,16 +22,10 @@ pub async fn is_user_valid(
 
     let locked_state = state.lock().await;
 
-    let user_get = locked_state.users.get(&user_uuid);
-
-    if user_get.is_none() {
-        return Json(UserValid { valid: false });
-    }
-
-    let user = user_get.unwrap();
+    let provided_user = locked_state.users.get(&user_uuid);
 
     let user_valid = UserValid {
-        valid: validate_user(&user_information, user),
+        valid: validate_user(&user_information, provided_user),
     };
 
     Json(user_valid)

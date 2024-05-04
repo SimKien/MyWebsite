@@ -2,7 +2,7 @@ use axum::{extract::{Query, State}, Json};
 use comlib::PlayerGameInformation;
 use uuid::Uuid;
 
-use crate::{state::SharedState, util::{get_player_color, validate_user}, UserQuery, COLOR_BLACK, COLOR_WHITE, INVALID_ID};
+use crate::{state::SharedState, utils::{get_player_color, validate_user}, UserQuery, COLOR_BLACK, COLOR_WHITE, INVALID_ID};
 
 /*
 lets user join existing game or creates new game
@@ -18,7 +18,7 @@ pub async fn get_user_game(
 
     if !validate_user(
         &user_information,
-        locked_state.users.get(&user_uuid).unwrap(),
+        locked_state.users.get(&user_uuid),
     ) {
         return Json(PlayerGameInformation {
             id: user_information.user_id,
