@@ -60,7 +60,7 @@ export interface Move {
 //types of moves
 export const MoveTypes = {
     CASTLING: "castling",
-    EN_PASSANT: "en-passant",
+    EN_PASSANT: "en_passant",
     PROMOTION: "promotion",
     NORMAL: "normal"
 }

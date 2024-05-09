@@ -4,7 +4,7 @@ use axum::{extract::{Query, State}, Json};
 use comlib::{SpecialMove, ValidMovesInformation};
 use uuid::Uuid;
 
-use crate::{state::SharedState, utils::{calculate_valid_moves, get_player_color, validate_user}, UserQuery};
+use crate::{state::SharedState, utils::{calculate_valid_moves, get_player_color, get_position_from_map, validate_user}, UserQuery};
 
 /*
 returns the current validmoves of the player through the current game fen
@@ -51,11 +51,21 @@ pub async fn get_valid_moves(
 
     let fen = current_game.fen.clone();
     let player_to_play = get_player_color(&current_player, &current_game);
-    let valid_moves = calculate_valid_moves(fen, player_to_play);
+    let valid_moves_bitboard = calculate_valid_moves(fen, player_to_play);
+
+    let mut valid_moves = HashMap::<String, Vec<String>>::new();
+    for (key, value) in valid_moves_bitboard.0.iter() {
+        valid_moves.insert(get_position_from_map(key), value.iter().map(|x| get_position_from_map(x)).collect());
+    }
+    let special_moves = valid_moves_bitboard.1.iter().map(|x| SpecialMove {
+        from_absolute: get_position_from_map(&x.move_from),
+        to_absolute: get_position_from_map(&x.move_to),
+        special_type: x.move_type.clone(),
+    }).collect();
 
     let result = ValidMovesInformation {
-        valid_moves: valid_moves.0,
-        special_moves: valid_moves.1
+        valid_moves: valid_moves,
+        special_moves: special_moves,
     };
 
     Json(result)

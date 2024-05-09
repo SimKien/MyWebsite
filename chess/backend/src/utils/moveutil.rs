@@ -1,19 +1,24 @@
 use std::collections::HashMap;
 
-use comlib::SpecialMove;
-
 use crate::{
     utils::{get_castling_options_from_fen, get_en_passant_from_fen},
     COLOR_BLACK, COLOR_WHITE,
 };
 
-use super::get_board_position_from_fen;
+use super::{get_board_position_from_fen, get_player_to_play_from_fen};
 
 #[derive(Debug, Clone)]
 struct Piece {
     piece_type: String,
     piece_color: String,
     position_map: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct SpecialMoveBitboard {
+    pub move_type: String,
+    pub move_from: u64,
+    pub move_to: u64,
 }
 
 struct Position {
@@ -68,6 +73,24 @@ impl Position {
 
 type PossibleMove = (i32, i32);
 
+enum MoveType {
+    Normal,
+    EnPassant,
+    Castling,
+    Promotion,
+}
+
+impl MoveType {
+    fn to_string(&self) -> String {
+        match self {
+            MoveType::Normal => String::from("normal"),
+            MoveType::EnPassant => String::from("en_passant"),
+            MoveType::Castling => String::from("castling"),
+            MoveType::Promotion => String::from("promotion"),
+        }
+    }
+}
+
 const BISHOP_MOVES: [PossibleMove; 4] = [(1, 1), (1, -1), (-1, 1), (-1, -1)];
 const ROOK_MOVES: [PossibleMove; 4] = [(1, 0), (0, 1), (-1, 0), (0, -1)];
 const KNIGHT_MOVES: [PossibleMove; 8] = [
@@ -104,10 +127,16 @@ const QUEEN_MOVES: [PossibleMove; 8] = [
 pub fn calculate_valid_moves(
     fen: String,
     player_to_play: String,
-) -> (HashMap<String, Vec<String>>, Vec<SpecialMove>) {
+) -> (HashMap<u64, Vec<u64>>, Vec<SpecialMoveBitboard>) {
     let board_position = get_board_position_from_fen(&fen);
     let castling_options = get_castling_options_from_fen(&fen);
     let en_passant = get_en_passant_from_fen(&fen);
+
+    let en_passant = if en_passant == "-" || get_player_to_play_from_fen(&fen) != player_to_play {
+        None
+    } else {
+        Some(get_map_from_position(&en_passant))
+    };
 
     let (white_pieces, black_pieces) = calculate_piece_maps(&board_position);
 
@@ -123,33 +152,84 @@ pub fn calculate_valid_moves(
 
     let all_pieces: u64 = white_map | black_map;
 
-    let mut valid_moves: HashMap<String, Vec<String>> = HashMap::new();
-    let special_moves = Vec::new();
-
-    let regarded_pieces = if player_to_play == COLOR_WHITE {
-        white_pieces.clone()
+    let (regarded_pieces, opponent_pieces) = if player_to_play == COLOR_WHITE {
+        (white_pieces.clone(), black_pieces.clone())
     } else {
-        black_pieces.clone()
+        (black_pieces.clone(), white_pieces.clone())
     };
 
-    for piece in &regarded_pieces {
-        let new_valid_moves = 
-        if piece.piece_type == "P" {
-            calculate_moves_for_pawn(piece, &all_pieces, &black_map, &white_map)
+    let regarded_king = regarded_pieces.iter().find(|piece| piece.piece_type == "K").unwrap();
+
+    //TODO what if king in ckeck or checkmate
+    //TODO what if pinned piece
+
+    let (mut valid_moves, mut special_moves) = calculate_moves_for_group(
+        &regarded_pieces,
+        &all_pieces,
+        &black_map,
+        &white_map,
+        &en_passant,
+    );
+    let (opponent_valid_moves, _) = calculate_moves_for_group(
+        &opponent_pieces,
+        &all_pieces,
+        &black_map,
+        &white_map,
+        &None,
+    );
+
+    let castling_moves = calculate_castling_moves(&regarded_king, &castling_options, &opponent_valid_moves);
+    let mut currentvalid_moves = valid_moves.get(&regarded_king.position_map).unwrap().clone();
+    for castling_move in &castling_moves {
+        currentvalid_moves.push(castling_move.move_to);
+    }
+    valid_moves.insert(regarded_king.position_map, currentvalid_moves);
+    special_moves.extend(castling_moves);
+
+    return (valid_moves, special_moves);
+}
+
+fn calculate_castling_moves(king: &Piece, castling_options: &String, opponent_moves: &HashMap<u64, Vec<u64>>) -> Vec<SpecialMoveBitboard> {
+    return Vec::new();
+}
+
+fn threatens_field(field: u64, opponent_moves: &HashMap<u64, Vec<u64>>) -> bool {
+    for (_, moves) in opponent_moves {
+        if moves.contains(&field) {
+            return true;
+        }
+    }
+    return false;
+}
+
+fn calculate_moves_for_group(
+    pieces: &Vec<Piece>,
+    all_pieces: &u64,
+    black_map: &u64,
+    white_map: &u64,
+    en_passant: &Option<u64>,
+) -> (HashMap<u64, Vec<u64>>, Vec<SpecialMoveBitboard>) {
+    let mut valid_moves = HashMap::new();
+    let mut special_moves = Vec::new();
+
+    for piece in pieces {
+        let new_valid_moves = if piece.piece_type == "P" {
+            calculate_moves_for_pawn(piece, &all_pieces, &black_map, &white_map, &en_passant)
         } else if piece.piece_type == "B" {
             calculate_moves_from_bishop(piece, &all_pieces, &black_map, &white_map)
         } else if piece.piece_type == "N" {
             calculate_moves_for_knight(piece, &all_pieces, &black_map, &white_map)
-        }  else if piece.piece_type == "K" {
+        } else if piece.piece_type == "K" {
             calculate_moves_for_king(piece, &all_pieces, &black_map, &white_map)
         } else if piece.piece_type == "Q" {
             calculate_moves_for_queen(piece, &all_pieces, &black_map, &white_map)
         } else if piece.piece_type == "R" {
             calculate_moves_for_rook(piece, &all_pieces, &black_map, &white_map)
         } else {
-            Vec::new()
+            (Vec::new(), Vec::new())
         };
-        valid_moves.insert(get_position_from_map(&piece.position_map), new_valid_moves);
+        valid_moves.insert(piece.position_map.clone(), new_valid_moves.0);
+        special_moves.extend(new_valid_moves.1);
     }
 
     return (valid_moves, special_moves);
@@ -160,7 +240,7 @@ fn calculate_moves_for_rook(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let opponent_map = if piece.piece_color == COLOR_WHITE {
@@ -188,10 +268,7 @@ fn calculate_moves_for_rook(
         moves.map = position;
     }
 
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, Vec::new());
 }
 
 fn calculate_moves_for_queen(
@@ -199,7 +276,7 @@ fn calculate_moves_for_queen(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let opponent_map = if piece.piece_color == COLOR_WHITE {
@@ -227,10 +304,7 @@ fn calculate_moves_for_queen(
         moves.map = position;
     }
 
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, Vec::new());
 }
 
 fn calculate_moves_for_king(
@@ -238,7 +312,7 @@ fn calculate_moves_for_king(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let opponent_map = if piece.piece_color == COLOR_WHITE {
@@ -261,10 +335,7 @@ fn calculate_moves_for_king(
         moves.map = position;
     }
 
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, Vec::new());
 }
 
 fn calculate_moves_for_knight(
@@ -272,7 +343,7 @@ fn calculate_moves_for_knight(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let opponent_map = if piece.piece_color == COLOR_WHITE {
@@ -295,10 +366,7 @@ fn calculate_moves_for_knight(
         moves.map = position;
     }
 
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, Vec::new());
 }
 
 fn calculate_moves_from_bishop(
@@ -306,7 +374,7 @@ fn calculate_moves_from_bishop(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let opponent_map = if piece.piece_color == COLOR_WHITE {
@@ -334,10 +402,7 @@ fn calculate_moves_from_bishop(
         moves.map = position;
     }
 
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, Vec::new());
 }
 
 fn calculate_moves_for_pawn(
@@ -345,7 +410,8 @@ fn calculate_moves_for_pawn(
     all_pieces: &u64,
     black_map: &u64,
     white_map: &u64,
-) -> Vec<String> {
+    en_passant: &Option<u64>,
+) -> (Vec<u64>, Vec<SpecialMoveBitboard>) {
     let position = piece.position_map;
     let mut valid_moves = Vec::new();
     let mut starter_pos = 0x000000000000FF00;
@@ -356,12 +422,13 @@ fn calculate_moves_for_pawn(
         move_direction = -1;
         opponent_map = white_map;
     }
+    let mut special_moves = Vec::new();
 
     let mut moves = Position::new();
     moves.map = position;
     let worked = moves.move_up(move_direction * 1);
     if !worked {
-        return Vec::new();
+        return (Vec::new(), Vec::new());
     }
     if moves.map & all_pieces == 0 {
         valid_moves.push(moves.map);
@@ -377,6 +444,13 @@ fn calculate_moves_for_pawn(
     if worked {
         if moves.map & opponent_map != 0 {
             valid_moves.push(moves.map);
+        } else if Some(moves.map) == *en_passant {
+            valid_moves.push(moves.map);
+            special_moves.push(SpecialMoveBitboard {
+                move_type: String::from(MoveType::EnPassant.to_string()),
+                move_from: position,
+                move_to: moves.map,
+            });
         }
     }
     moves.map = position;
@@ -384,12 +458,16 @@ fn calculate_moves_for_pawn(
     if worked {
         if moves.map & opponent_map != 0 {
             valid_moves.push(moves.map);
+        } else if Some(moves.map) == *en_passant {
+            valid_moves.push(moves.map);
+            special_moves.push(SpecialMoveBitboard {
+                move_type: String::from(MoveType::EnPassant.to_string()),
+                move_from: position,
+                move_to: moves.map,
+            });
         }
     }
-    return valid_moves
-        .iter()
-        .map(|x| get_position_from_map(x))
-        .collect();
+    return (valid_moves, special_moves);
 }
 
 fn is_upper_edge(map: &u64) -> bool {
@@ -408,7 +486,15 @@ fn is_left_edge(map: &u64) -> bool {
     return map & 0x8080808080808080 != 0;
 }
 
-fn get_position_from_map(map: &u64) -> String {
+fn get_map_from_position(position: &String) -> u64 {
+    let mut result: u64 = 0;
+    let col = position.chars().nth(0).unwrap() as u8 - 97;
+    let row = position.chars().nth(1).unwrap() as u8 - 49;
+    result |= 1 << (row * 8 + (7 - col));
+    return result;
+}
+
+pub fn get_position_from_map(map: &u64) -> String {
     let mut result = String::new();
     let mut pos: u8 = 0;
     for i in 0..64 {
