@@ -1,11 +1,11 @@
-mod storage;
-mod state;
-mod utils;
 mod routes;
+mod state;
+mod storage;
+mod utils;
 
 use std::sync::Arc;
 
-use storage::{import_games, import_players, import_users, write_state_loop, import_pending_game};
+use storage::{import_games, import_pending_game, import_players, import_users, write_state_loop};
 
 use axum::{
     routing::{get, get_service},
@@ -13,12 +13,14 @@ use axum::{
 };
 use comlib::WebsocketMessage;
 use serde::{Deserialize, Serialize};
-use tokio::sync::{mpsc::{Receiver, Sender}, Mutex, MutexGuard};
+use tokio::sync::{
+    mpsc::{Receiver, Sender},
+    Mutex, MutexGuard,
+};
 use tower_http::services::{ServeDir, ServeFile};
 use uuid::Uuid;
 
 use crate::state::AppState;
-
 
 //tyoes
 #[derive(Debug)]
@@ -98,15 +100,11 @@ pub struct PendingGame {
 
 impl PendingGame {
     pub fn new() -> Self {
-        Self {
-            game: None,
-        }
+        Self { game: None }
     }
 
     pub fn new_with_game(game: Uuid) -> Self {
-        Self {
-            game: Some(game),
-        }
+        Self { game: Some(game) }
     }
 
     pub fn update(&mut self, player_id: &Uuid, state: &MutexGuard<AppState>) -> (Uuid, Game) {
@@ -116,7 +114,7 @@ impl PendingGame {
                 game.black_player = player_id.clone();
                 self.game = None;
                 (id.clone(), game)
-            },
+            }
             None => {
                 let game = Game::new(player_id.clone(), Uuid::nil());
                 let new_game_uuid = Uuid::new_v4();
@@ -125,7 +123,6 @@ impl PendingGame {
             }
         }
     }
-
 }
 
 //constants
@@ -142,9 +139,7 @@ pub const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 pub const INVALID_ID: Uuid = Uuid::nil();
 pub const TOKEN_LENGTH: usize = 32;
 
-
 //TODO: man könnte überlegen, clients zu löschen wenn die websocket communication abbricht, für Skalierbarkeit
-
 
 /*
 Starts an axum server and serve the frontend and the api
