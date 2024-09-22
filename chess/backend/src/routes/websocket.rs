@@ -1,11 +1,17 @@
-use axum::{extract::{ws::WebSocket, Query, State, WebSocketUpgrade}, response::IntoResponse};
+use axum::{
+    extract::{ws::WebSocket, Query, State, WebSocketUpgrade},
+    response::IntoResponse,
+};
 use comlib::WebsocketMessage;
 use futures_util::{SinkExt, StreamExt};
 use tracing::{error, warn};
 use uuid::Uuid;
 
-use crate::{state::{AppState, SharedState}, utils::{get_player_color, validate_user}, Client, ClientConnection, UserQuery, INVALID_ID, MESSAGE_TYPES};
-
+use crate::{
+    state::{AppState, SharedState},
+    utils::{get_player_color, validate_user},
+    Client, ClientConnection, UserQuery, INVALID_ID, MESSAGE_TYPES,
+};
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
@@ -47,10 +53,7 @@ async fn handle_socket(
 
         let mut locked_state = state.lock().await;
 
-        if !validate_user(
-            &user_information,
-            locked_state.users.get(&user_uuid),
-        ) {
+        if !validate_user(&user_information, locked_state.users.get(&user_uuid)) {
             locked_state.clients.remove(&user_uuid);
             return;
         }
@@ -77,7 +80,7 @@ async fn handle_socket(
                 error!("Invalid message");
                 return;
             };
-            println!("Received from client: {:?}", msg);
+            //println!("Received from client: {:?}", msg);
 
             if msg.message_type == MESSAGE_TYPES[1] {
                 continue;
@@ -133,7 +136,7 @@ async fn handle_socket(
     while let Some(msg) = client_connection.recv.recv().await {
         let msg = serde_json::to_string(&msg).unwrap();
 
-        println!("Send to client: {}", msg);
+        //println!("Send to client: {}", msg);
         if sender.send(msg.into()).await.is_err() {
             error!("Failed to send message");
             return;

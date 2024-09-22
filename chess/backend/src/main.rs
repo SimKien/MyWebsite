@@ -5,6 +5,7 @@ mod utils;
 
 use std::sync::Arc;
 
+use admin_console::run_admin_panel;
 use storage::{import_games, import_pending_game, import_players, import_users, write_state_loop};
 
 use axum::{
@@ -163,6 +164,7 @@ async fn main() {
     println!("Games at start: {:?}", state.lock().await.games);
 
     tokio::spawn(write_state_loop(state.clone()));
+    tokio::spawn(run_admin_panel());
 
     let port = std::env::var("CHESS_PORT").unwrap_or_else(|_| "5173".to_string());
 
