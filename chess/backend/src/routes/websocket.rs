@@ -32,7 +32,7 @@ pub async fn ws_handler(
     locked_state.clients.insert(user_uuid, client);
 
     let client_connection = ClientConnection {
-        id: user_uuid.clone(),
+        id: user_uuid,
         recv: receiver,
     };
 
@@ -120,7 +120,7 @@ async fn handle_socket(
 
             //TODO: Update board position and valid moves, aber zuerst boardposition setzen dass validmoves richtig funktioniert
 
-            current_game.player_to_play = opponent_id.clone();
+            current_game.player_to_play = opponent_id;
 
             locked_state.games.remove(&current_player.current_game_id);
             locked_state

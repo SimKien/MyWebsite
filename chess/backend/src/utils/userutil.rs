@@ -8,8 +8,8 @@ pub fn validate_user(transfered_user: &UserQuery, actual_user: Option<&User>) ->
     let actual_user = actual_user.unwrap();
 
     let actual_id_string = actual_user.user_id.to_string();
-    return transfered_user.user_id == actual_id_string
-        && transfered_user.token == actual_user.token;
+    transfered_user.user_id == actual_id_string
+        && transfered_user.token == actual_user.token
 }
 
 pub fn get_player_color(player: &Player, game: &Game) -> String {

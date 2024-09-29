@@ -38,7 +38,7 @@ impl Position {
                 }
                 self.map >>= 8;
             }
-            return true;
+            true
         } else {
             for _ in 0..steps {
                 if is_upper_edge(&self.map) {
@@ -46,7 +46,7 @@ impl Position {
                 }
                 self.map <<= 8;
             }
-            return true;
+            true
         }
     }
 
@@ -58,7 +58,7 @@ impl Position {
                 }
                 self.map <<= 1;
             }
-            return true;
+            true
         } else {
             for _ in 0..steps {
                 if is_right_edge(&self.map) {
@@ -66,7 +66,7 @@ impl Position {
                 }
                 self.map >>= 1;
             }
-            return true;
+            true
         }
     }
 }
@@ -178,7 +178,7 @@ pub fn calculate_valid_moves(
         &None,
     );
 
-    let castling_moves = calculate_castling_moves(&regarded_king, &castling_options, &opponent_valid_moves);
+    let castling_moves = calculate_castling_moves(regarded_king, &castling_options, &opponent_valid_moves);
     let mut currentvalid_moves = valid_moves.get(&regarded_king.position_map).unwrap().clone();
     for castling_move in &castling_moves {
         currentvalid_moves.push(castling_move.move_to);
@@ -186,11 +186,11 @@ pub fn calculate_valid_moves(
     valid_moves.insert(regarded_king.position_map, currentvalid_moves);
     special_moves.extend(castling_moves);
 
-    return (valid_moves, special_moves);
+    (valid_moves, special_moves)
 }
 
-fn calculate_castling_moves(king: &Piece, castling_options: &String, opponent_moves: &HashMap<u64, Vec<u64>>) -> Vec<SpecialMoveBitboard> {
-    return Vec::new();
+fn calculate_castling_moves(_king: &Piece, _castling_options: &String, _opponent_moves: &HashMap<u64, Vec<u64>>) -> Vec<SpecialMoveBitboard> {
+    Vec::new()
 }
 
 fn threatens_field(field: u64, opponent_moves: &HashMap<u64, Vec<u64>>) -> bool {
@@ -199,7 +199,7 @@ fn threatens_field(field: u64, opponent_moves: &HashMap<u64, Vec<u64>>) -> bool 
             return true;
         }
     }
-    return false;
+    false
 }
 
 fn calculate_moves_for_group(
@@ -214,25 +214,25 @@ fn calculate_moves_for_group(
 
     for piece in pieces {
         let new_valid_moves = if piece.piece_type == "P" {
-            calculate_moves_for_pawn(piece, &all_pieces, &black_map, &white_map, &en_passant)
+            calculate_moves_for_pawn(piece, all_pieces, black_map, white_map, en_passant)
         } else if piece.piece_type == "B" {
-            calculate_moves_from_bishop(piece, &all_pieces, &black_map, &white_map)
+            calculate_moves_from_bishop(piece, all_pieces, black_map, white_map)
         } else if piece.piece_type == "N" {
-            calculate_moves_for_knight(piece, &all_pieces, &black_map, &white_map)
+            calculate_moves_for_knight(piece, all_pieces, black_map, white_map)
         } else if piece.piece_type == "K" {
-            calculate_moves_for_king(piece, &all_pieces, &black_map, &white_map)
+            calculate_moves_for_king(piece, all_pieces, black_map, white_map)
         } else if piece.piece_type == "Q" {
-            calculate_moves_for_queen(piece, &all_pieces, &black_map, &white_map)
+            calculate_moves_for_queen(piece, all_pieces, black_map, white_map)
         } else if piece.piece_type == "R" {
-            calculate_moves_for_rook(piece, &all_pieces, &black_map, &white_map)
+            calculate_moves_for_rook(piece, all_pieces, black_map, white_map)
         } else {
             (Vec::new(), Vec::new())
         };
-        valid_moves.insert(piece.position_map.clone(), new_valid_moves.0);
+        valid_moves.insert(piece.position_map, new_valid_moves.0);
         special_moves.extend(new_valid_moves.1);
     }
 
-    return (valid_moves, special_moves);
+    (valid_moves, special_moves)
 }
 
 fn calculate_moves_for_rook(
@@ -268,7 +268,7 @@ fn calculate_moves_for_rook(
         moves.map = position;
     }
 
-    return (valid_moves, Vec::new());
+    (valid_moves, Vec::new())
 }
 
 fn calculate_moves_for_queen(
@@ -304,7 +304,7 @@ fn calculate_moves_for_queen(
         moves.map = position;
     }
 
-    return (valid_moves, Vec::new());
+    (valid_moves, Vec::new())
 }
 
 fn calculate_moves_for_king(
@@ -335,7 +335,7 @@ fn calculate_moves_for_king(
         moves.map = position;
     }
 
-    return (valid_moves, Vec::new());
+    (valid_moves, Vec::new())
 }
 
 fn calculate_moves_for_knight(
@@ -366,7 +366,7 @@ fn calculate_moves_for_knight(
         moves.map = position;
     }
 
-    return (valid_moves, Vec::new());
+    (valid_moves, Vec::new())
 }
 
 fn calculate_moves_from_bishop(
@@ -402,7 +402,7 @@ fn calculate_moves_from_bishop(
         moves.map = position;
     }
 
-    return (valid_moves, Vec::new());
+    (valid_moves, Vec::new())
 }
 
 fn calculate_moves_for_pawn(
@@ -426,72 +426,72 @@ fn calculate_moves_for_pawn(
 
     let mut moves = Position::new();
     moves.map = position;
-    let worked = moves.move_up(move_direction * 1);
+    let worked = moves.move_up(move_direction);
     if !worked {
         return (Vec::new(), Vec::new());
     }
     if moves.map & all_pieces == 0 {
         valid_moves.push(moves.map);
         if position & starter_pos != 0 {
-            moves.move_up(move_direction * 1);
+            moves.move_up(move_direction);
             if moves.map & all_pieces == 0 {
                 valid_moves.push(moves.map);
             }
         }
     }
     moves.map = position;
-    let worked = moves.move_right(1) && moves.move_up(move_direction * 1);
+    let worked = moves.move_right(1) && moves.move_up(move_direction);
     if worked {
         if moves.map & opponent_map != 0 {
             valid_moves.push(moves.map);
         } else if Some(moves.map) == *en_passant {
             valid_moves.push(moves.map);
             special_moves.push(SpecialMoveBitboard {
-                move_type: String::from(MoveType::EnPassant.to_string()),
+                move_type: MoveType::EnPassant.to_string(),
                 move_from: position,
                 move_to: moves.map,
             });
         }
     }
     moves.map = position;
-    let worked = moves.move_right(-1) && moves.move_up(move_direction * 1);
+    let worked = moves.move_right(-1) && moves.move_up(move_direction);
     if worked {
         if moves.map & opponent_map != 0 {
             valid_moves.push(moves.map);
         } else if Some(moves.map) == *en_passant {
             valid_moves.push(moves.map);
             special_moves.push(SpecialMoveBitboard {
-                move_type: String::from(MoveType::EnPassant.to_string()),
+                move_type: MoveType::EnPassant.to_string(),
                 move_from: position,
                 move_to: moves.map,
             });
         }
     }
-    return (valid_moves, special_moves);
+    (valid_moves, special_moves)
 }
 
 fn is_upper_edge(map: &u64) -> bool {
-    return map & 0xFF00000000000000 != 0;
+    map & 0xFF00000000000000 != 0
 }
 
 fn is_lower_edge(map: &u64) -> bool {
-    return map & 0x00000000000000FF != 0;
+    map & 0x00000000000000FF != 0
 }
 
 fn is_right_edge(map: &u64) -> bool {
-    return map & 0x0101010101010101 != 0;
+    map & 0x0101010101010101 != 0
 }
 
 fn is_left_edge(map: &u64) -> bool {
-    return map & 0x8080808080808080 != 0;
+    map & 0x8080808080808080 != 0
 }
 
 fn get_map_from_position(position: &String) -> u64 {
     let mut result: u64 = 0;
-    let col = position.chars().nth(0).unwrap() as u8 - 97;
+    let col = position.chars().next().unwrap() as u8 - 97;
     let row = position.chars().nth(1).unwrap() as u8 - 49;
     result |= 1 << (row * 8 + (7 - col));
-    return result;
+    result
 }
 
 pub fn get_position_from_map(map: &u64) -> String {
@@ -507,7 +507,7 @@ pub fn get_position_from_map(map: &u64) -> String {
     let col = pos % 8;
     result.push((col + 97) as char);
     result.push((56 - row) as char);
-    return result;
+    result
 }
 
 fn calculate_piece_maps(board_position: &String) -> (Vec<Piece>, Vec<Piece>) {
@@ -521,29 +521,27 @@ fn calculate_piece_maps(board_position: &String) -> (Vec<Piece>, Vec<Piece>) {
         if letter == '/' {
             row += 1;
             col = 0;
+        } else if letter.is_ascii_digit() {
+            col += letter.to_digit(10).unwrap();
         } else {
-            if letter.is_digit(10) {
-                col += letter.to_digit(10).unwrap();
-            } else {
-                let piece = Piece {
-                    piece_type: letter.to_string().to_uppercase(),
-                    piece_color: if letter.is_uppercase() {
-                        String::from(COLOR_WHITE)
-                    } else {
-                        String::from(COLOR_BLACK)
-                    },
-                    position_map: 1 << (63 - (row * 8 + col)),
-                };
-                if piece.piece_color == COLOR_WHITE {
-                    white_pieces.push(piece);
+            let piece = Piece {
+                piece_type: letter.to_string().to_uppercase(),
+                piece_color: if letter.is_uppercase() {
+                    String::from(COLOR_WHITE)
                 } else {
-                    black_pieces.push(piece);
-                }
-                col += 1;
+                    String::from(COLOR_BLACK)
+                },
+                position_map: 1 << (63 - (row * 8 + col)),
+            };
+            if piece.piece_color == COLOR_WHITE {
+                white_pieces.push(piece);
+            } else {
+                black_pieces.push(piece);
             }
+            col += 1;
         }
     }
-    return (white_pieces, black_pieces);
+    (white_pieces, black_pieces)
 }
 
 /*

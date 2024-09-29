@@ -35,7 +35,7 @@ pub async fn get_board_position(
     let board_position = get_board_position_from_fen(&current_game.fen);
 
     let board_position = BoardPositionInformation {
-        board_position: board_position
+        board_position
     };
     Json(board_position)
 }

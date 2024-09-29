@@ -32,7 +32,7 @@ pub async fn get_user_game(
     let mut current_player = match current_player_option {
         None => {
             let user = locked_state.users.get(&user_uuid).unwrap().clone();
-            let new_player = crate::Player::new(user, INVALID_ID.clone(), false);
+            let new_player = crate::Player::new(user, INVALID_ID, false);
             locked_state.players.insert(user_uuid, new_player);
             locked_state.players.get(&user_uuid).unwrap().clone()
         }
@@ -44,12 +44,12 @@ pub async fn get_user_game(
             .games
             .get(&current_player.current_game_id)
             .unwrap();
-        let color = get_player_color(&current_player, &current_game);
+        let color = get_player_color(&current_player, current_game);
 
         let res = PlayerGameInformation {
             id: user_information.user_id,
             token: user_information.token,
-            color: color,
+            color,
         };
 
         return Json(res);
@@ -64,11 +64,11 @@ pub async fn get_user_game(
     };
 
     let update_state = pending_game.update(&user_uuid, &locked_state);
-    locked_state.games.insert(update_state.0.clone(), update_state.1);
+    locked_state.games.insert(update_state.0, update_state.1);
     locked_state.pending_game = pending_game;
 
     current_player.in_game = true;
-    current_player.current_game_id = update_state.0.clone();
+    current_player.current_game_id = update_state.0;
     locked_state.players.insert(user_uuid, current_player);
 
     let result = PlayerGameInformation {

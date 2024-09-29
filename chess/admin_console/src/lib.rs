@@ -3,7 +3,7 @@ mod suggestor;
 mod validator;
 
 use bunt::println;
-use commands::match_command;
+use commands::execute_command;
 use inquire::Text;
 use suggestor::command_suggestor;
 use validator::command_validator;
@@ -18,7 +18,7 @@ pub async fn run_admin_panel() {
             .prompt()
             .unwrap();
 
-        if match_command(cmd) {
+        if execute_command(cmd) {
             println!("{$red}Exiting admin panel{/$}");
             break;
         }

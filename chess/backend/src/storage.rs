@@ -132,7 +132,7 @@ pub fn import_users() -> HashMap<Uuid, User> {
         users.insert(user_id, user);
     }
 
-    return users;
+    users
 }
 
 pub fn import_players(users: &HashMap<Uuid, User>) -> HashMap<Uuid, Player> {
@@ -152,14 +152,14 @@ pub fn import_players(users: &HashMap<Uuid, User>) -> HashMap<Uuid, Player> {
         let player_file_store = unprocessed_player.1;
         let user = users.get(&Uuid::parse_str(&player_file_store.id).unwrap()).unwrap().clone();
         let player = Player {
-            user: user,
+            user,
             current_game_id: Uuid::parse_str(&player_file_store.current_game_id).unwrap(),
             in_game: player_file_store.in_game,
         };
         players.insert(player_id, player);
     }
 
-    return players;
+    players
 }
 
 pub fn import_games() -> HashMap<Uuid, Game> {
@@ -187,7 +187,7 @@ pub fn import_games() -> HashMap<Uuid, Game> {
         games.insert(game_id, game);
     }
 
-    return games;
+    games
 }
 
 pub fn import_pending_game() -> PendingGame {
@@ -202,5 +202,5 @@ pub fn import_pending_game() -> PendingGame {
 
     let pending_game_id = Uuid::parse_str(&pending_game).unwrap();
 
-    return PendingGame::new_with_game(pending_game_id);
+    PendingGame::new_with_game(pending_game_id)
 }

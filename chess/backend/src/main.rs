@@ -3,7 +3,7 @@ mod state;
 mod storage;
 mod utils;
 
-use std::sync::Arc;
+use std::{process::Command, sync::Arc, time::Duration};
 
 use admin_console::run_admin_panel;
 use storage::{import_games, import_pending_game, import_players, import_users, write_state_loop};
@@ -49,10 +49,7 @@ pub struct User {
 
 impl User {
     pub fn new(user_id: Uuid, token: String) -> Self {
-        Self {
-            user_id: user_id,
-            token: token,
-        }
+        Self { user_id, token }
     }
 }
 
@@ -66,9 +63,9 @@ pub struct Player {
 impl Player {
     pub fn new(user: User, current_game_id: Uuid, in_game: bool) -> Self {
         Self {
-            user: user,
-            current_game_id: current_game_id,
-            in_game: in_game,
+            user,
+            current_game_id,
+            in_game,
         }
     }
 }
@@ -99,6 +96,12 @@ pub struct PendingGame {
     game: Option<Uuid>,
 }
 
+impl Default for PendingGame {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PendingGame {
     pub fn new() -> Self {
         Self { game: None }
@@ -112,15 +115,15 @@ impl PendingGame {
         match self.game {
             Some(id) => {
                 let mut game = state.games.get(&id).unwrap().clone();
-                game.black_player = player_id.clone();
+                game.black_player = *player_id;
                 self.game = None;
-                (id.clone(), game)
+                (id, game)
             }
             None => {
-                let game = Game::new(player_id.clone(), Uuid::nil());
+                let game = Game::new(*player_id, Uuid::nil());
                 let new_game_uuid = Uuid::new_v4();
                 self.game = Some(new_game_uuid);
-                (new_game_uuid.clone(), game)
+                (new_game_uuid, game)
             }
         }
     }
@@ -184,10 +187,8 @@ async fn main() {
         .nest_service(
             "/",
             get_service(
-                ServeDir::new(&FRONTEND_BASE_DIR).fallback(ServeFile::new(&format!(
-                    "{}/index.html",
-                    &FRONTEND_BASE_DIR
-                ))),
+                ServeDir::new(FRONTEND_BASE_DIR)
+                    .fallback(ServeFile::new(format!("{}/index.html", &FRONTEND_BASE_DIR))),
             ),
         )
         .with_state(state.clone());

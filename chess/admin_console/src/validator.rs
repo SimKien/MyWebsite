@@ -3,7 +3,7 @@ use inquire::{
     CustomUserError,
 };
 
-use crate::commands::{Command, BASE_COMMANDS};
+use crate::commands::{Command, BASE_COMMANDS, COMMAND_ADDONS};
 
 /*
     Entry point for the recursive command validation.
@@ -18,7 +18,16 @@ pub fn command_validator(input: &str) -> Result<Validation, CustomUserError> {
         )));
     }
 
-    recursive_validator(cmd_parts, 0, BASE_COMMANDS, None)
+    let mut cmd_parts_updated = cmd_parts.clone();
+    for part in cmd_parts.iter().rev() {
+        if COMMAND_ADDONS.iter().any(|a| a.name == *part) {
+            cmd_parts_updated.pop();
+        } else {
+            break;
+        }
+    }
+
+    recursive_validator(cmd_parts_updated, 0, BASE_COMMANDS, None)
 }
 
 /*

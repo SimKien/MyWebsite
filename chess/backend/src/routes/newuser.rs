@@ -23,7 +23,7 @@ pub async fn get_new_user(State(state): State<SharedState>) -> Json<UserInformat
 
     let mut state = state.lock().await;
 
-    let new_user = User::new(user_id.clone(), random_token.clone());
+    let new_user = User::new(user_id, random_token.clone());
 
     state.users.insert(user_id, new_user);
 
